@@ -1,10 +1,10 @@
-package com.diploma.critical_data_logger;
+package com.diploma.airline_data_logger;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CriticalDataLoggerApplicationTests {
+class AirlineDataLoggerApplicationTests {
 
 	@Test
 	void contextLoads() {
