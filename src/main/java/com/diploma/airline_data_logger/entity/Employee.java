@@ -8,7 +8,7 @@ public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private int employeeId;
 
     @Column(name = "email")
     private String email;
@@ -23,19 +23,19 @@ public class Employee {
     public Employee() {
     }
 
-    public Employee(int id, String email, String password, Role role) {
-        this.id = id;
+    public Employee(int employeeId, String email, String password, Role role) {
+        this.employeeId = employeeId;
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
-    public int getId() {
-        return id;
+    public int getEmployeeId() {
+        return employeeId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setEmployeeId(int employeeId) {
+        this.employeeId = employeeId;
     }
 
     public String getEmail() {

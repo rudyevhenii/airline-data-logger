@@ -12,8 +12,8 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int roleId;
 
-    @Column(name = "role")
-    private String role;
+    @Column(name = "name")
+    private String name;
 
     @OneToMany(mappedBy = "role", targetEntity = Employee.class)
     private Set<Employee> employees;
@@ -21,9 +21,9 @@ public class Role {
     public Role() {
     }
 
-    public Role(int roleId, String role) {
+    public Role(int roleId, String name) {
         this.roleId = roleId;
-        this.role = role;
+        this.name = name;
     }
 
     public int getRoleId() {
@@ -34,11 +34,11 @@ public class Role {
         this.roleId = roleId;
     }
 
-    public String getRole() {
-        return role;
+    public String getName() {
+        return name;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setName(String name) {
+        this.name = name;
     }
 }
