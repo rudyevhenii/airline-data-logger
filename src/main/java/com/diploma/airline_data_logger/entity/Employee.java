@@ -1,29 +1,19 @@
 package com.diploma.airline_data_logger.entity;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "employees")
 public class Employee {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int employeeId;
 
-    @Column(name = "email")
     private String email;
 
-    @Column(name = "password")
     private String password;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH, targetEntity = Role.class)
-    @JoinColumn(name = "role_id", referencedColumnName = "roleId", nullable = false)
-    private Role role;
+    private String role;
 
     public Employee() {
     }
 
-    public Employee(int employeeId, String email, String password, Role role) {
+    public Employee(int employeeId, String email, String password, String role) {
         this.employeeId = employeeId;
         this.email = email;
         this.password = password;
@@ -54,11 +44,12 @@ public class Employee {
         this.password = password;
     }
 
-    public Role getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(Role role) {
+    public void setRole(String role) {
         this.role = role;
     }
+
 }

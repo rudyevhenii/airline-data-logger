@@ -16,8 +16,9 @@ public class LoginController {
             model.addAttribute("errorMessage", "Email or Password is incorrect!");
         }
         if (logout != null) {
-            model.addAttribute("logoutMessage", "You have successfully logged out!");
+            model.addAttribute("successMessage", "You have successfully logged out!");
         }
         return "login";
     }
+
 }

@@ -8,18 +8,7 @@
 </head>
 <body class="bg-light">
 <!-- Alert -->
-<div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
-  <div class="alert alert-danger alert-dismissible fade show rounded-5" role="alert"
-       th:if="${errorMessage != null}">
-    <span th:text="${errorMessage}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
-  <div class="alert alert-success alert-dismissible fade show rounded-5" role="alert"
-       th:if="${logoutMessage != null}">
-    <span th:text="${logoutMessage}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
-</div>
+<div th:replace="~{alert :: alerts}"></div>
 
 <!-- Login Form -->
 <div class="container d-flex justify-content-center align-items-center min-vh-100">

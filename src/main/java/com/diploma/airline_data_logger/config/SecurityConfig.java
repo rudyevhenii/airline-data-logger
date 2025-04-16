@@ -16,7 +16,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                .requestMatchers("/", "/dashboard").authenticated()
+                .requestMatchers("/", "/dashboard/**", "/tables/**").authenticated()
                 .requestMatchers("/login").permitAll());
         http.formLogin(flc -> flc.loginPage("/login")
                 .defaultSuccessUrl("/dashboard")
@@ -36,4 +36,5 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoderFactories() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
+
 }

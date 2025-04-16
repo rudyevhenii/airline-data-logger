@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="https://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
@@ -12,15 +11,15 @@
     <ul class="navbar-nav h5">
       <li class="nav-item mx-2">
         <a class="nav-link fw-bold text-light"
-           href="#" sec:authorize="isAuthenticated()">Tables</a>
+           th:href="@{/dashboard}">Tables</a>
       </li>
       <li class="nav-item mx-2">
         <a class="nav-link fw-bold text-light"
-           href="#" sec:authorize="hasRole('ROLE_ADMIN')">Staff</a>
+           href="#">Staff</a>
       </li>
       <li class="nav-item mx-2">
         <a class="nav-link fw-bold text-light"
-           th:href="@{logout}" sec:authorize="isAuthenticated()">Logout</a>
+           th:href="@{logout}">Logout</a>
       </li>
     </ul>
   </div>
