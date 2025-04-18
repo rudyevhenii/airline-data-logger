@@ -1,17 +1,25 @@
 package com.diploma.airline_data_logger.repository;
 
 import java.util.List;
-import java.util.Map;
 
 public interface TableAuditRepository {
 
-    Map<String, List<String>> getAllTableColumns();
+    List<String> getAllTableNames();
 
-    List<String> getColumnsForTable(String tableName);
+    List<String> getAllColumnsForTable(String tableName);
 
-    boolean createLoggingTableByTableName(String tableName);
+    List<String> getAllColumnsDataType(String tableName);
 
-    List<String> getColumnsDataType(String tableName);
+    void createAuditTableByTableName(String tableName);
 
-    boolean doesTableExist(String tableName);
+    boolean doesAuditTableExist(String tableName);
+
+    void deleteAuditTableByTableName(String tableName);
+
+    void createTriggersForTable(String tableName);
+
+    boolean doTriggersExistForTable(String tableName);
+
+    void deleteTriggersByTableName(String tableName);
+
 }

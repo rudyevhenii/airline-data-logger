@@ -7,12 +7,12 @@
 <body>
 <!-- Alert -->
 <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;" th:fragment="alerts">
-  <div class="alert alert-danger alert-dismissible fade show rounded-5" role="alert"
+  <div class="alert alert-danger alert-dismissible rounded-5 auto-vanish" role="alert"
        th:if="${errorMessage != null}">
     <span th:text="${errorMessage}"></span>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
-  <div class="alert alert-success alert-dismissible fade show rounded-5" role="alert"
+  <div class="alert alert-success alert-dismissible rounded-5 auto-vanish" role="alert"
        th:if="${successMessage != null}">
     <span th:text="${successMessage}"></span>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>

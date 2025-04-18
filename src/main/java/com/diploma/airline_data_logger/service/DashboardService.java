@@ -1,36 +1,22 @@
 package com.diploma.airline_data_logger.service;
 
-import com.diploma.airline_data_logger.repository.TableAuditRepository;
+import com.diploma.airline_data_logger.dto.TableSchemaDto;
+import com.diploma.airline_data_logger.repository.DashboardRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class DashboardService {
 
-    private final TableAuditRepository tableAuditRepository;
+    private final DashboardRepository dashboardRepository;
 
-    public DashboardService(TableAuditRepository tableAuditRepository) {
-        this.tableAuditRepository = tableAuditRepository;
+    public DashboardService(DashboardRepository dashboardRepository) {
+        this.dashboardRepository = dashboardRepository;
     }
 
-    public Map<String, List<String>> getTableNames() {
-        var tableColumns = tableAuditRepository.getAllTableColumns();
-
-        return tableColumns;
+    public List<TableSchemaDto> getTableSchemas() {
+        return dashboardRepository.getAllTableSchemas();
     }
 
-    public String createLogTableByTableName(String tableName) {
-        String auditTable = tableName + "_audit";
-
-        if (tableAuditRepository.doesTableExist(tableName)) {
-            return "%s table already exists.".formatted(auditTable);
-        }
-        boolean created = tableAuditRepository.createLoggingTableByTableName(tableName);
-        if (created) {
-            return "%s table successfully created!".formatted(auditTable);
-        }
-        return "Something went wrong!";
-    }
 }
