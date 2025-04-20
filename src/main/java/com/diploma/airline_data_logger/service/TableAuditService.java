@@ -16,11 +16,11 @@ public class TableAuditService {
         String auditTable = "audit_" + tableName;
 
         if (tableAuditRepository.doesAuditTableExist(tableName)) {
-            return "%s table already exists.".formatted(auditTable);
+            return "'%s' table already exists.".formatted(auditTable);
         }
         tableAuditRepository.createAuditTableByTableName(tableName);
 
-        return "%s table successfully created!".formatted(auditTable);
+        return "'%s' table successfully created!".formatted(auditTable);
     }
 
     public String createTriggersForTable(String tableName) {
@@ -34,7 +34,7 @@ public class TableAuditService {
             }
             tableAuditRepository.createTriggersForTable(tableName);
         }
-        return "Triggers for table %s successfully created!".formatted(tableName);
+        return "Triggers for table '%s' successfully created!".formatted(tableName);
     }
 
     public String deleteTriggersByTableName(String tableName) {
@@ -44,17 +44,17 @@ public class TableAuditService {
 
         if (tableAuditRepository.doesAuditTableExist(tableName)) {
             if (!tableAuditRepository.doTriggersExistForTable(tableName)) {
-                return "Triggers for table %s do not exist!".formatted(tableName);
+                return "Triggers for table '%s' do not exist!".formatted(tableName);
             }
             tableAuditRepository.deleteTriggersByTableName(tableName);
         }
-        return "Triggers for table %s successfully deleted!".formatted(tableName);
+        return "Triggers for table '%s' successfully deleted!".formatted(tableName);
     }
 
     public String deleteAuditTableByTableName(String tableName) {
         String auditTable = "audit_" + tableName;
         if (!tableAuditRepository.doesAuditTableExist(tableName)) {
-            return "Table %s does not exist!".formatted(auditTable);
+            return "Table '%s' does not exist!".formatted(auditTable);
         }
 
         if (tableAuditRepository.doesAuditTableExist(tableName)) {
@@ -63,7 +63,7 @@ public class TableAuditService {
             }
             tableAuditRepository.deleteAuditTableByTableName(tableName);
         }
-        return "%s table successfully deleted!".formatted(auditTable);
+        return "'%s' table successfully deleted!".formatted(auditTable);
     }
 
 }

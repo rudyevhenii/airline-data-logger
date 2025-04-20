@@ -3,11 +3,8 @@ package com.diploma.airline_data_logger.entity;
 public class Employee {
 
     private int employeeId;
-
     private String email;
-
     private String password;
-
     private String role;
 
     public Employee() {

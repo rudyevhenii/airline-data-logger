@@ -19,4 +19,5 @@ public enum TriggerOperation {
     public String getOperationNameUpperCase() {
         return operation.toUpperCase();
     }
+
 }

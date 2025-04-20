@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="'Table ' + ${#strings.capitalizeWords(#strings.replace(tableName, '_', ' '))}"></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body class="bg-light">
+<div th:replace="~{header :: header}"></div>
+
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-end mb-4">
+    <h2 th:text="'Table - audit_' + ${tableName}"></h2>
+    <h4 th:text="'Record count: ' + ${recordCount}"></h4>
+  </div>
+  <hr>
+  <h4 class="mb-4">Filtration configuration:</h4>
+  <div class="col-md-6 my-4">
+    <form class="row g-3 align-items-end bg-light"
+          th:action="@{/dashboard/table-audit/{tableName}(tableName=${tableName})}" method="get">
+      <div class="col-md-5">
+        <label for="startTime" class="form-label">Start Time:</label>
+        <input type="datetime-local" class="form-control" id="startTime" name="startTime">
+      </div>
+      <div class="col-md-5">
+        <label for="endTime" class="form-label">End Time:</label>
+        <input type="datetime-local" class="form-control" id="endTime" name="endTime">
+      </div>
+      <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-primary">Filter</button>
+      </div>
+    </form>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover table-bordered table-striped text-center
+                  align-middle small w-100 mb-4">
+      <thead class="table-dark">
+      <tr>
+        <th th:each="tableAuditColumn : ${tableAuditColumns}" th:text="${tableAuditColumn}"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="tableAuditData : ${tableAuditList}">
+        <td th:text="${tableAuditData.id}"></td>
+        <td th:text="${tableAuditData.dateOp}"></td>
+        <td th:text="${tableAuditData.codeOp}"></td>
+        <td th:text="${tableAuditData.userOp}"></td>
+        <td th:text="${tableAuditData.hostOp}"></td>
+        <td th:each="beforeChange : ${tableAuditData.columnsBeforeChange}"
+            th:text="${beforeChange} != null ? ${beforeChange} : '-'"></td>
+        <td th:each="afterChange : ${tableAuditData.columnsAfterChange}"
+            th:text="${afterChange} != null ? ${afterChange} : '-'"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+</html>

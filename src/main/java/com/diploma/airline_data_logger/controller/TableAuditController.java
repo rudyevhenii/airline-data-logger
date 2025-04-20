@@ -2,8 +2,9 @@ package com.diploma.airline_data_logger.controller;
 
 import com.diploma.airline_data_logger.service.TableAuditService;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -14,14 +15,6 @@ public class TableAuditController {
 
     public TableAuditController(TableAuditService tableAuditService) {
         this.tableAuditService = tableAuditService;
-    }
-
-    @GetMapping("/{tableName}")
-    public String getAuditTableLogs(@PathVariable String tableName,
-                                    Model model) {
-        model.addAttribute("tableName", tableName);
-
-        return "table";
     }
 
     @GetMapping("/create-log-table/{tableName}")

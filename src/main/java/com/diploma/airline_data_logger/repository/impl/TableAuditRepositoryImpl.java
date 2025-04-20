@@ -17,7 +17,6 @@ import java.util.stream.IntStream;
 public class TableAuditRepositoryImpl implements TableAuditRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private String auditTable;
 
     public TableAuditRepositoryImpl(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -211,12 +210,13 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
     public void deleteTriggersByTableName(String tableName) {
         for (TriggerOperation trigger : TriggerOperation.values()) {
             String deleteTrigger = """
-                DROP TRIGGER IF EXISTS `%s`.`%s`;
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME,
+                    DROP TRIGGER IF EXISTS `%s`.`%s`;
+                    """.formatted(ProjectConstants.DB_SCHEMA_NAME,
                     "after_%s_%s".formatted(trigger.getOperationNameLowerCase(),
-                    tableName.substring(0, tableName.length() - 1)));
+                            tableName.endsWith("s") ? tableName.substring(0, tableName.length() - 1) : tableName));
 
             jdbcTemplate.execute(deleteTrigger);
         }
     }
+
 }
