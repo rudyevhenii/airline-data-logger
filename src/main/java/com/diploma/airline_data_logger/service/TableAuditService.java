@@ -18,7 +18,7 @@ public class TableAuditService {
         if (tableAuditRepository.doesAuditTableExist(tableName)) {
             return "'%s' table already exists.".formatted(auditTable);
         }
-        tableAuditRepository.createAuditTableByTableName(tableName);
+        tableAuditRepository.createAuditTable(tableName);
 
         return "'%s' table successfully created!".formatted(auditTable);
     }
@@ -46,7 +46,7 @@ public class TableAuditService {
             if (!tableAuditRepository.doTriggersExistForTable(tableName)) {
                 return "Triggers for table '%s' do not exist!".formatted(tableName);
             }
-            tableAuditRepository.deleteTriggersByTableName(tableName);
+            tableAuditRepository.deleteTriggersForTable(tableName);
         }
         return "Triggers for table '%s' successfully deleted!".formatted(tableName);
     }
@@ -59,9 +59,9 @@ public class TableAuditService {
 
         if (tableAuditRepository.doesAuditTableExist(tableName)) {
             if (tableAuditRepository.doTriggersExistForTable(tableName)) {
-                tableAuditRepository.deleteTriggersByTableName(tableName);
+                tableAuditRepository.deleteTriggersForTable(tableName);
             }
-            tableAuditRepository.deleteAuditTableByTableName(tableName);
+            tableAuditRepository.deleteAuditTable(tableName);
         }
         return "'%s' table successfully deleted!".formatted(auditTable);
     }

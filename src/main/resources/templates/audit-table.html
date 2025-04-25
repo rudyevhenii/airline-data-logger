@@ -2,12 +2,16 @@
 <html lang="en" xmlns:th="https://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title th:text="'Table ' + ${#strings.capitalizeWords(#strings.replace(tableName, '_', ' '))}"></title>
+  <title th:text="'Table audit_' + ${tableName}"></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body class="bg-light">
+<!-- Header -->
 <div th:replace="~{header :: header}"></div>
+<!-- Alert -->
+<div th:replace="~{alert :: alerts}"></div>
 
 <div class="container mt-5">
   <div class="d-flex justify-content-between align-items-end mb-4">
@@ -38,6 +42,7 @@
       <thead class="table-dark">
       <tr>
         <th th:each="tableAuditColumn : ${tableAuditColumns}" th:text="${tableAuditColumn}"></th>
+        <th>Restore</th>
       </tr>
       </thead>
       <tbody>
@@ -47,10 +52,16 @@
         <td th:text="${tableAuditData.codeOp}"></td>
         <td th:text="${tableAuditData.userOp}"></td>
         <td th:text="${tableAuditData.hostOp}"></td>
+        <td th:text="${tableAuditData.tableId}"></td>
         <td th:each="beforeChange : ${tableAuditData.columnsBeforeChange}"
             th:text="${beforeChange} != null ? ${beforeChange} : '-'"></td>
         <td th:each="afterChange : ${tableAuditData.columnsAfterChange}"
             th:text="${afterChange} != null ? ${afterChange} : '-'"></td>
+        <td>
+          <a class="btn btn-sm btn-outline-success fw-bold"
+             th:if="${!#strings.equals(tableAuditData.codeOp, 'I')}"
+             th:href="@{/dashboard/restore/{tableName}(tableName=${tableName}, id=${tableAuditData.id})}">Restore</a>
+        </td>
       </tr>
       </tbody>
     </table>

@@ -32,4 +32,10 @@ public class DashboardService {
         return dashboardRepository.doesAuditTableExist(tableName);
     }
 
+    public String restoreRecordInTable(String tableName, int id) {
+        dashboardRepository.restoreRecord(tableName, id);
+
+        return "The record in the table '%s' successfully restored!".formatted(tableName);
+    }
+
 }

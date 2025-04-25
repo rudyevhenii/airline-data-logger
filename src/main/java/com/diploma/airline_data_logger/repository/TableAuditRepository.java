@@ -10,16 +10,16 @@ public interface TableAuditRepository {
 
     List<String> getAllColumnsDataType(String tableName);
 
-    void createAuditTableByTableName(String tableName);
+    void createAuditTable(String tableName);
 
     boolean doesAuditTableExist(String tableName);
 
-    void deleteAuditTableByTableName(String tableName);
+    void deleteAuditTable(String tableName);
 
     void createTriggersForTable(String tableName);
 
     boolean doTriggersExistForTable(String tableName);
 
-    void deleteTriggersByTableName(String tableName);
+    void deleteTriggersForTable(String tableName);
 
 }

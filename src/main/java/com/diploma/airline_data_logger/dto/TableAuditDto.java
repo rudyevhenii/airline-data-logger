@@ -9,19 +9,21 @@ public class TableAuditDto {
     private String codeOp;
     private String userOp;
     private String hostOp;
+    private int tableId;
     private List<String> columnsBeforeChange;
     private List<String> columnsAfterChange;
 
     public TableAuditDto() {
     }
 
-    public TableAuditDto(int id, String dateOp, String codeOp, String userOp,
-                         String hostOp, List<String> columnsBeforeChange, List<String> columnsAfterChange) {
+    public TableAuditDto(int id, String dateOp, String codeOp, String userOp, String hostOp, int tableId,
+                         List<String> columnsBeforeChange, List<String> columnsAfterChange) {
         this.id = id;
         this.dateOp = dateOp;
         this.codeOp = codeOp;
         this.userOp = userOp;
         this.hostOp = hostOp;
+        this.tableId = tableId;
         this.columnsBeforeChange = columnsBeforeChange;
         this.columnsAfterChange = columnsAfterChange;
     }
@@ -64,6 +66,14 @@ public class TableAuditDto {
 
     public void setHostOp(String hostOp) {
         this.hostOp = hostOp;
+    }
+
+    public int getTableId() {
+        return tableId;
+    }
+
+    public void setTableId(int tableId) {
+        this.tableId = tableId;
     }
 
     public List<String> getColumnsBeforeChange() {

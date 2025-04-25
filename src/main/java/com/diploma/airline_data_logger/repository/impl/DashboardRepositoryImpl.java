@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class DashboardRepositoryImpl implements DashboardRepository {
@@ -52,12 +53,16 @@ public class DashboardRepositoryImpl implements DashboardRepository {
     public List<TableAuditDto> loadDataFromAuditTable(String tableName,
                                                       String startTime, String endTime) {
         String auditTable = "audit_" + tableName;
-        List<String> auditTableNames = tableAuditRepository.getAllColumnsForTable(auditTable);
-        List<String> tableNames = tableAuditRepository.getAllColumnsForTable(tableName);
-
         String sql = getDateFiltrationSql(auditTable, startTime, endTime);
 
-        return jdbcTemplate.query(sql, new RowMapper<TableAuditDto>() {
+        return jdbcTemplate.query(sql, getRowMapperForTableAuditDto(auditTable, tableName));
+    }
+
+    private RowMapper<TableAuditDto> getRowMapperForTableAuditDto(String auditTable, String tableName) {
+        List<String> auditTableColumnNames = tableAuditRepository.getAllColumnsForTable(auditTable);
+        List<String> tableColumnNames = tableAuditRepository.getAllColumnsForTable(tableName);
+
+        return new RowMapper<TableAuditDto>() {
 
             @Override
             public TableAuditDto mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -67,11 +72,12 @@ public class DashboardRepositoryImpl implements DashboardRepository {
                 tableAuditDto.setCodeOp(rs.getString("code_op"));
                 tableAuditDto.setUserOp(rs.getString("user_op"));
                 tableAuditDto.setHostOp(rs.getString("host_op"));
+                tableAuditDto.setTableId(rs.getInt(auditTableColumnNames.get(5)));
 
-                List<String> columnsBeforeChange = auditTableNames
-                        .subList(5, auditTableNames.size() - tableNames.size() + 1);
-                List<String> columnsAfterChange = auditTableNames.subList(
-                        auditTableNames.size() - tableNames.size() + 1, auditTableNames.size());
+                List<String> columnsBeforeChange = auditTableColumnNames
+                        .subList(6, auditTableColumnNames.size() - tableColumnNames.size() + 1);
+                List<String> columnsAfterChange = auditTableColumnNames.subList(
+                        auditTableColumnNames.size() - tableColumnNames.size() + 1, auditTableColumnNames.size());
 
                 List<String> dataFromColumnsBeforeChange = getDataFromResultSet(rs, columnsBeforeChange);
                 List<String> dataFromColumnsAfterChange = getDataFromResultSet(rs, columnsAfterChange);
@@ -92,7 +98,7 @@ public class DashboardRepositoryImpl implements DashboardRepository {
                             }
                         }).toList();
             }
-        });
+        };
     }
 
     private String getDateFiltrationSql(String auditTable, String startTime, String endTime) {
@@ -115,6 +121,49 @@ public class DashboardRepositoryImpl implements DashboardRepository {
     @Override
     public boolean doesAuditTableExist(String tableName) {
         return tableAuditRepository.doesAuditTableExist(tableName);
+    }
+
+    @Override
+    public void restoreRecord(String tableName, int id) {
+        String auditTable = "audit_" + tableName;
+
+        List<String> tableColumnNames = tableAuditRepository.getAllColumnsForTable(tableName);
+        TableAuditDto tableAudit = findRecordInAuditTableById(tableName, id);
+        List<String> insertValues = tableAudit.getColumnsBeforeChange();
+
+        String insertPlaceholders = insertValues.stream()
+                .map(val -> "?")
+                .collect(Collectors.joining(", "));
+        String valueAlias = "new_" + (tableName.endsWith("s") ?
+                tableName.substring(0, tableName.length() - 1) : tableName);
+        String updateStructure = tableColumnNames.subList(1, tableColumnNames.size()).stream()
+                .map(col -> "\t%1$s = %2$s.%1$s".formatted(col, valueAlias))
+                .collect(Collectors.joining(",\n"));
+
+        String sql = """
+                INSERT INTO %1$s (%2$s)
+                VALUES (%3$d, %4$s) AS %5$s
+                ON DUPLICATE KEY UPDATE
+                %6$s;
+                """.formatted(tableName,
+                String.join(", ", tableColumnNames),
+                tableAudit.getTableId(),
+                insertPlaceholders,
+                valueAlias,
+                updateStructure);
+
+        jdbcTemplate.update(sql, insertValues.toArray());
+    }
+
+    @Override
+    public TableAuditDto findRecordInAuditTableById(String tableName, int id) {
+        String auditTable = "audit_" + tableName;
+        String sql = """
+                SELECT * FROM %s
+                WHERE id = %d;
+                """.formatted(auditTable, id);
+
+        return jdbcTemplate.queryForObject(sql, getRowMapperForTableAuditDto(auditTable, tableName));
     }
 
 }

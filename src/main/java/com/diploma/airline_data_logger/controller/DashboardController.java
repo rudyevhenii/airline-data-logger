@@ -56,4 +56,13 @@ public class DashboardController {
         return "audit-table";
     }
 
+    @GetMapping("/dashboard/restore/{tableName}")
+    public String restoreRecordInTable(@PathVariable String tableName, @RequestParam int id,
+                                       RedirectAttributes redirectAttributes) {
+        String message = dashboardService.restoreRecordInTable(tableName, id);
+        redirectAttributes.addFlashAttribute("successMessage", message);
+
+        return "redirect:/dashboard/table-audit/" + tableName;
+    }
+
 }

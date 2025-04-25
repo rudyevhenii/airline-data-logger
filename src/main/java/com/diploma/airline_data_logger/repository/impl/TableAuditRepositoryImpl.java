@@ -63,7 +63,7 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
     }
 
     @Override
-    public void createAuditTableByTableName(String tableName) {
+    public void createAuditTable(String tableName) {
         String columnsBeforeChange = getColumnsStructure(tableName, "");
         String columnsAfterChange = getColumnsStructure(tableName, "_");
         String completeColumnsStructure = columnsBeforeChange + columnsAfterChange;
@@ -90,8 +90,9 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
         int columnLength = columnNames.size();
 
         return IntStream.range(0, columnLength)
-                .filter(i -> !(tableName.substring(0, tableName.length() - 1) + "_id_")
-                        .equals(columnNames.get(i) + suffix))
+                .filter(i -> tableName.endsWith("s") ? !(tableName.substring(0, tableName.length() - 1) + "_id_")
+                                .equals(columnNames.get(i) + suffix) :
+                        !(tableName + "_id_").equals(columnNames.get(i) + suffix))
                 .mapToObj(i -> "\t%s %s%s%s".formatted(columnNames.get(i) + suffix,
                         columnDataTypes.get(i),
                         columnDataTypes.get(i).equalsIgnoreCase("varchar") ? "(100)" : "",
@@ -114,7 +115,7 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
     }
 
     @Override
-    public void deleteAuditTableByTableName(String tableName) {
+    public void deleteAuditTable(String tableName) {
         String auditTable = "audit_" + tableName;
         String sql = "DROP TABLE IF EXISTS %s".formatted(auditTable);
 
@@ -137,6 +138,13 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
         List<String> auditTableNames = getAllColumnsForTable(auditTable);
         List<String> tableNames = getAllColumnsForTable(tableName);
 
+        String name = tableName.endsWith("s") ? tableName.substring(0, tableName.length() - 1) : tableName;
+        String auditColumns = auditTableNames.subList(1, 6).stream()
+                .map(col -> col + ", ")
+                .collect(Collectors.joining());
+        String auditColumnsByTrigger = getAuditColumnsByTrigger(auditTableNames, tableNames, triggerOperation);
+        String valueByTrigger = getValueByTrigger(tableNames, triggerOperation);
+
         String trigger = """
                 CREATE TRIGGER after_%s_%s
                 AFTER %s ON %s
@@ -149,16 +157,14 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
                     );
                 END;""".formatted(
                 triggerOperation.getOperationNameLowerCase(),
-                tableName.endsWith("s") ? tableName.substring(0, tableName.length() - 1) : tableName,
+                name,
                 triggerOperation.getOperationNameUpperCase(),
                 tableName,
                 auditTable,
-                auditTableNames.subList(1, 6).stream()
-                        .map(col -> col + ", ")
-                        .collect(Collectors.joining()),
-                getAuditColumnsByTrigger(auditTableNames, tableNames, triggerOperation),
+                auditColumns,
+                auditColumnsByTrigger,
                 triggerOperation.getOperationNameUpperCase().charAt(0),
-                getValueByTrigger(tableNames, triggerOperation));
+                valueByTrigger);
 
         return trigger;
     }
@@ -207,7 +213,7 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
     }
 
     @Override
-    public void deleteTriggersByTableName(String tableName) {
+    public void deleteTriggersForTable(String tableName) {
         for (TriggerOperation trigger : TriggerOperation.values()) {
             String deleteTrigger = """
                     DROP TRIGGER IF EXISTS `%s`.`%s`;

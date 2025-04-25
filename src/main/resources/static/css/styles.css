@@ -1,0 +1,13 @@
+@keyframes vanish {
+  0% {
+    opacity: 1; pointer-events: auto;
+  }
+  100% {
+    opacity: 0; pointer-events: none; display: none;
+  }
+}
+
+.auto-vanish {
+  animation: vanish 2s ease-in forwards;
+  animation-delay: 5s;
+}

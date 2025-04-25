@@ -15,4 +15,8 @@ public interface DashboardRepository {
 
     boolean doesAuditTableExist(String tableName);
 
+    void restoreRecord(String tableName, int id);
+
+    TableAuditDto findRecordInAuditTableById(String tableName, int id);
+
 }
