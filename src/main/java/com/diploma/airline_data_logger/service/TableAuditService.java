@@ -16,7 +16,7 @@ public class TableAuditService {
         String auditTable = "audit_" + tableName;
 
         if (tableAuditRepository.doesAuditTableExist(tableName)) {
-            return "'%s' table already exists.".formatted(auditTable);
+            throw new IllegalStateException("'%s' table already exists.".formatted(auditTable));
         }
         tableAuditRepository.createAuditTable(tableName);
 
@@ -25,12 +25,12 @@ public class TableAuditService {
 
     public String createTriggersForTable(String tableName) {
         if (!tableAuditRepository.doesAuditTableExist(tableName)) {
-            return "Audit table should be created first!";
+            throw new IllegalStateException("Audit table should be created first!");
         }
 
         if (tableAuditRepository.doesAuditTableExist(tableName)) {
             if (tableAuditRepository.doTriggersExistForTable(tableName)) {
-                return "Triggers for table %s already exist!".formatted(tableName);
+                throw new IllegalStateException("Triggers for table %s already exist!".formatted(tableName));
             }
             tableAuditRepository.createTriggersForTable(tableName);
         }
@@ -39,12 +39,12 @@ public class TableAuditService {
 
     public String deleteTriggersByTableName(String tableName) {
         if (!tableAuditRepository.doesAuditTableExist(tableName)) {
-            return "Audit table should be created first!";
+            throw new IllegalStateException("Audit table should be created first!");
         }
 
         if (tableAuditRepository.doesAuditTableExist(tableName)) {
             if (!tableAuditRepository.doTriggersExistForTable(tableName)) {
-                return "Triggers for table '%s' do not exist!".formatted(tableName);
+                throw new IllegalStateException("Triggers for table '%s' do not exist!".formatted(tableName));
             }
             tableAuditRepository.deleteTriggersForTable(tableName);
         }
@@ -54,7 +54,7 @@ public class TableAuditService {
     public String deleteAuditTableByTableName(String tableName) {
         String auditTable = "audit_" + tableName;
         if (!tableAuditRepository.doesAuditTableExist(tableName)) {
-            return "Table '%s' does not exist!".formatted(auditTable);
+            throw new IllegalStateException("Table '%s' does not exist!".formatted(auditTable));
         }
 
         if (tableAuditRepository.doesAuditTableExist(tableName)) {

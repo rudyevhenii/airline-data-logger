@@ -124,7 +124,7 @@ public class DashboardRepositoryImpl implements DashboardRepository {
     }
 
     @Override
-    public void restoreRecord(String tableName, int id) {
+    public boolean restoreRecord(String tableName, int id) {
         String auditTable = "audit_" + tableName;
 
         List<String> tableColumnNames = tableAuditRepository.getAllColumnsForTable(tableName);
@@ -152,7 +152,8 @@ public class DashboardRepositoryImpl implements DashboardRepository {
                 valueAlias,
                 updateStructure);
 
-        jdbcTemplate.update(sql, insertValues.toArray());
+        int count = jdbcTemplate.update(sql, insertValues.toArray());
+        return count > 0;
     }
 
     @Override

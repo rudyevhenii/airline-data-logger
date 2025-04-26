@@ -33,8 +33,10 @@ public class DashboardService {
     }
 
     public String restoreRecordInTable(String tableName, int id) {
-        dashboardRepository.restoreRecord(tableName, id);
-
+        boolean restored = dashboardRepository.restoreRecord(tableName, id);
+        if (!restored) {
+            throw new IllegalStateException("Something went wrong!");
+        }
         return "The record in the table '%s' successfully restored!".formatted(tableName);
     }
 
