@@ -1,19 +1,27 @@
+DROP SCHEMA IF EXISTS `airline_data_logger`;
 -- Users creation in the database
 CREATE SCHEMA IF NOT EXISTS `airline_data_logger`;
 
 USE `airline_data_logger`;
 
+-- Role table
+CREATE TABLE IF NOT EXISTS `roles` (
+    `role_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(100) NOT NULL
+);
+
 -- Employees table
-CREATE TABLE IF NOT EXISTS `employees`(
+CREATE TABLE IF NOT EXISTS `employees` (
 	`employee_id` INT AUTO_INCREMENT PRIMARY KEY,
     `email` VARCHAR(100) NOT NULL UNIQUE,
     `password` VARCHAR(100) NOT NULL,
-    `role` VARCHAR(100) NOT NULL,
+    `role_id` INT NOT NULL,
+    CONSTRAINT FK_EmployeeRole FOREIGN KEY (`role_id`) REFERENCES `roles`(`role_id`)
 );
 
 -- The whole airline db system that should be logged
 -- Table that stores flight information
-CREATE TABLE `flights` (
+CREATE TABLE IF NOT EXISTS `flights` (
     `flight_id` INT PRIMARY KEY AUTO_INCREMENT,
     `departure_time` DATETIME NOT NULL,
     `arrival_time` DATETIME NOT NULL,
@@ -22,7 +30,7 @@ CREATE TABLE `flights` (
 );
 
 -- Table that stores passenger information
-CREATE TABLE `passengers` (
+CREATE TABLE IF NOT EXISTS `passengers` (
     `passenger_id` INT PRIMARY KEY AUTO_INCREMENT,
     `first_name` VARCHAR(100) NOT NULL,
     `last_name` VARCHAR(100) NOT NULL,
@@ -31,7 +39,7 @@ CREATE TABLE `passengers` (
 );
 
 -- Table that stores flight bookings made by passengers
-CREATE TABLE `bookings` (
+CREATE TABLE IF NOT EXISTS `bookings` (
     `booking_id` INT PRIMARY KEY AUTO_INCREMENT,
     `flight_id` INT NOT NULL,
     `passenger_id` INT NOT NULL,
@@ -42,14 +50,14 @@ CREATE TABLE `bookings` (
 );
 
 -- Table that stores crew roles
-CREATE TABLE `crew_roles` (
+CREATE TABLE IF NOT EXISTS `crew_roles` (
     `role_id` INT PRIMARY KEY AUTO_INCREMENT,
     `role_name` VARCHAR(50) NOT NULL,
     `description` TEXT
 );
 
 -- Table that contains crew members
-CREATE TABLE `crew` (
+CREATE TABLE IF NOT EXISTS `crew` (
     `crew_id` INT PRIMARY KEY AUTO_INCREMENT,
     `first_name` VARCHAR(100) NOT NULL,
     `last_name` VARCHAR(100) NOT NULL,
@@ -60,7 +68,7 @@ CREATE TABLE `crew` (
 );
 
 -- Table that assigns crew members to specific flights
-CREATE TABLE `crew_assignments` (
+CREATE TABLE IF NOT EXISTS `crew_assignments` (
     `assignment_id` INT PRIMARY KEY AUTO_INCREMENT,
     `flight_id` INT NOT NULL,
     `crew_id` INT NOT NULL,

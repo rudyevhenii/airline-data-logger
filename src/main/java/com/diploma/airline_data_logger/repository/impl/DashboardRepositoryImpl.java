@@ -3,7 +3,7 @@ package com.diploma.airline_data_logger.repository.impl;
 import com.diploma.airline_data_logger.dto.TableAuditDto;
 import com.diploma.airline_data_logger.dto.TableSchemaDto;
 import com.diploma.airline_data_logger.repository.DashboardRepository;
-import com.diploma.airline_data_logger.repository.TableAuditRepository;
+import com.diploma.airline_data_logger.repository.TableMetadataProvider;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -18,25 +18,26 @@ import java.util.stream.Collectors;
 @Repository
 public class DashboardRepositoryImpl implements DashboardRepository {
 
-    private final TableAuditRepository tableAuditRepository;
     private final JdbcTemplate jdbcTemplate;
+    private final TableMetadataProvider tableMetadataProvider;
 
-    public DashboardRepositoryImpl(TableAuditRepository tableAuditRepository, DataSource dataSource) {
-        this.tableAuditRepository = tableAuditRepository;
+    public DashboardRepositoryImpl(DataSource dataSource,
+                                   TableMetadataProvider tableMetadataProvider) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.tableMetadataProvider = tableMetadataProvider;
     }
 
     @Override
     public List<TableSchemaDto> getAllTableSchemas() {
         List<TableSchemaDto> tableSchemas = new ArrayList<>();
-        List<String> allTableNames = tableAuditRepository.getAllTableNames();
+        List<String> allTableNames = tableMetadataProvider.getAllTableNames();
 
         for (String allTableName : allTableNames) {
             TableSchemaDto tableSchemaDto = new TableSchemaDto(
                     allTableName,
-                    tableAuditRepository.getAllColumnsForTable(allTableName),
-                    tableAuditRepository.doesAuditTableExist(allTableName),
-                    tableAuditRepository.doTriggersExistForTable(allTableName));
+                    tableMetadataProvider.getAllColumnsForTable(allTableName),
+                    tableMetadataProvider.doesAuditTableExist(allTableName),
+                    tableMetadataProvider.doTriggersExistForTable(allTableName));
 
             tableSchemas.add(tableSchemaDto);
         }
@@ -46,7 +47,7 @@ public class DashboardRepositoryImpl implements DashboardRepository {
     @Override
     public List<String> getAllTableAuditColumns(String tableName) {
         String auditTable = "audit_" + tableName;
-        return tableAuditRepository.getAllColumnsForTable(auditTable);
+        return tableMetadataProvider.getAllColumnsForTable(auditTable);
     }
 
     @Override
@@ -59,15 +60,15 @@ public class DashboardRepositoryImpl implements DashboardRepository {
     }
 
     private RowMapper<TableAuditDto> getRowMapperForTableAuditDto(String auditTable, String tableName) {
-        List<String> auditTableColumnNames = tableAuditRepository.getAllColumnsForTable(auditTable);
-        List<String> tableColumnNames = tableAuditRepository.getAllColumnsForTable(tableName);
+        List<String> auditTableColumnNames = tableMetadataProvider.getAllColumnsForTable(auditTable);
+        List<String> tableColumnNames = tableMetadataProvider.getAllColumnsForTable(tableName);
 
         return new RowMapper<TableAuditDto>() {
 
             @Override
             public TableAuditDto mapRow(ResultSet rs, int rowNum) throws SQLException {
                 TableAuditDto tableAuditDto = new TableAuditDto();
-                tableAuditDto.setId(rs.getInt("id"));
+                tableAuditDto.setId(rs.getInt("audit_id"));
                 tableAuditDto.setDateOp(rs.getString("date_op"));
                 tableAuditDto.setCodeOp(rs.getString("code_op"));
                 tableAuditDto.setUserOp(rs.getString("user_op"));
@@ -120,14 +121,14 @@ public class DashboardRepositoryImpl implements DashboardRepository {
 
     @Override
     public boolean doesAuditTableExist(String tableName) {
-        return tableAuditRepository.doesAuditTableExist(tableName);
+        return tableMetadataProvider.doesAuditTableExist(tableName);
     }
 
     @Override
     public boolean restoreRecord(String tableName, int id) {
         String auditTable = "audit_" + tableName;
 
-        List<String> tableColumnNames = tableAuditRepository.getAllColumnsForTable(tableName);
+        List<String> tableColumnNames = tableMetadataProvider.getAllColumnsForTable(tableName);
         TableAuditDto tableAudit = findRecordInAuditTableById(tableName, id);
         List<String> insertValues = tableAudit.getColumnsBeforeChange();
 
@@ -141,10 +142,10 @@ public class DashboardRepositoryImpl implements DashboardRepository {
                 .collect(Collectors.joining(",\n"));
 
         String sql = """
-                INSERT INTO %1$s (%2$s)
-                VALUES (%3$d, %4$s) AS %5$s
+                INSERT INTO %s (%s)
+                VALUES (%d, %s) AS %s
                 ON DUPLICATE KEY UPDATE
-                %6$s;
+                %s;
                 """.formatted(tableName,
                 String.join(", ", tableColumnNames),
                 tableAudit.getTableId(),
@@ -161,7 +162,7 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         String auditTable = "audit_" + tableName;
         String sql = """
                 SELECT * FROM %s
-                WHERE id = %d;
+                WHERE audit_id = %d;
                 """.formatted(auditTable, id);
 
         return jdbcTemplate.queryForObject(sql, getRowMapperForTableAuditDto(auditTable, tableName));

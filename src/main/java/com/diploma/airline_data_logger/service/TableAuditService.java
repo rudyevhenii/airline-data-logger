@@ -1,21 +1,25 @@
 package com.diploma.airline_data_logger.service;
 
 import com.diploma.airline_data_logger.repository.TableAuditRepository;
+import com.diploma.airline_data_logger.repository.TableMetadataProvider;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TableAuditService {
 
     private final TableAuditRepository tableAuditRepository;
+    private final TableMetadataProvider tableMetadataProvider;
 
-    public TableAuditService(TableAuditRepository tableAuditRepository) {
+    public TableAuditService(TableAuditRepository tableAuditRepository,
+                             TableMetadataProvider tableMetadataProvider) {
         this.tableAuditRepository = tableAuditRepository;
+        this.tableMetadataProvider = tableMetadataProvider;
     }
 
     public String createAuditTableByTableName(String tableName) {
         String auditTable = "audit_" + tableName;
 
-        if (tableAuditRepository.doesAuditTableExist(tableName)) {
+        if (tableMetadataProvider.doesAuditTableExist(tableName)) {
             throw new IllegalStateException("'%s' table already exists.".formatted(auditTable));
         }
         tableAuditRepository.createAuditTable(tableName);
@@ -24,12 +28,12 @@ public class TableAuditService {
     }
 
     public String createTriggersForTable(String tableName) {
-        if (!tableAuditRepository.doesAuditTableExist(tableName)) {
+        if (!tableMetadataProvider.doesAuditTableExist(tableName)) {
             throw new IllegalStateException("Audit table should be created first!");
         }
 
-        if (tableAuditRepository.doesAuditTableExist(tableName)) {
-            if (tableAuditRepository.doTriggersExistForTable(tableName)) {
+        if (tableMetadataProvider.doesAuditTableExist(tableName)) {
+            if (tableMetadataProvider.doTriggersExistForTable(tableName)) {
                 throw new IllegalStateException("Triggers for table %s already exist!".formatted(tableName));
             }
             tableAuditRepository.createTriggersForTable(tableName);
@@ -38,12 +42,12 @@ public class TableAuditService {
     }
 
     public String deleteTriggersByTableName(String tableName) {
-        if (!tableAuditRepository.doesAuditTableExist(tableName)) {
+        if (!tableMetadataProvider.doesAuditTableExist(tableName)) {
             throw new IllegalStateException("Audit table should be created first!");
         }
 
-        if (tableAuditRepository.doesAuditTableExist(tableName)) {
-            if (!tableAuditRepository.doTriggersExistForTable(tableName)) {
+        if (tableMetadataProvider.doesAuditTableExist(tableName)) {
+            if (!tableMetadataProvider.doTriggersExistForTable(tableName)) {
                 throw new IllegalStateException("Triggers for table '%s' do not exist!".formatted(tableName));
             }
             tableAuditRepository.deleteTriggersForTable(tableName);
@@ -53,12 +57,12 @@ public class TableAuditService {
 
     public String deleteAuditTableByTableName(String tableName) {
         String auditTable = "audit_" + tableName;
-        if (!tableAuditRepository.doesAuditTableExist(tableName)) {
+        if (!tableMetadataProvider.doesAuditTableExist(tableName)) {
             throw new IllegalStateException("Table '%s' does not exist!".formatted(auditTable));
         }
 
-        if (tableAuditRepository.doesAuditTableExist(tableName)) {
-            if (tableAuditRepository.doTriggersExistForTable(tableName)) {
+        if (tableMetadataProvider.doesAuditTableExist(tableName)) {
+            if (tableMetadataProvider.doTriggersExistForTable(tableName)) {
                 tableAuditRepository.deleteTriggersForTable(tableName);
             }
             tableAuditRepository.deleteAuditTable(tableName);

@@ -2,13 +2,12 @@ package com.diploma.airline_data_logger.repository.impl;
 
 import com.diploma.airline_data_logger.constants.ProjectConstants;
 import com.diploma.airline_data_logger.constants.TriggerOperation;
-import com.diploma.airline_data_logger.dto.TableSchemaDto;
 import com.diploma.airline_data_logger.repository.TableAuditRepository;
+import com.diploma.airline_data_logger.repository.TableMetadataProvider;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -17,49 +16,12 @@ import java.util.stream.IntStream;
 public class TableAuditRepositoryImpl implements TableAuditRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final TableMetadataProvider tableMetadataProvider;
 
-    public TableAuditRepositoryImpl(DataSource dataSource) {
+    public TableAuditRepositoryImpl(DataSource dataSource,
+                                    TableMetadataProvider tableMetadataProvider) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
-
-    @Override
-    public List<String> getAllTableNames() {
-        List<TableSchemaDto> tableSchemas = new ArrayList<>();
-        String sql = """
-                SELECT table_name
-                FROM information_schema.TABLES
-                WHERE table_schema = '%s'
-                AND table_name <> 'employees'
-                AND NOT table_name LIKE 'audit_%%';
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME);
-
-        return jdbcTemplate.queryForList(sql, String.class);
-    }
-
-    @Override
-    public List<String> getAllColumnsForTable(String tableName) {
-        String sql = """
-                SELECT column_name
-                FROM information_schema.COLUMNS
-                WHERE table_name = ?
-                AND table_schema = '%s'
-                ORDER BY ordinal_position;
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME);
-
-        return jdbcTemplate.queryForList(sql, String.class, tableName);
-    }
-
-    @Override
-    public List<String> getAllColumnsDataType(String tableName) {
-        String sql = """
-                SELECT data_type
-                FROM information_schema.COLUMNS
-                WHERE table_name = ?
-                AND table_schema = '%s'
-                ORDER BY ordinal_position;
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME);
-
-        return jdbcTemplate.queryForList(sql, String.class, tableName);
+        this.tableMetadataProvider = tableMetadataProvider;
     }
 
     @Override
@@ -71,7 +33,7 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
         String auditTable = "audit_" + tableName;
         String sql = """
                 CREATE TABLE IF NOT EXISTS %s (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    audit_id INT AUTO_INCREMENT PRIMARY KEY,
                     date_op DATETIME NOT NULL,
                     code_op CHAR(1) NOT NULL,
                     user_op VARCHAR(100) NOT NULL,
@@ -83,8 +45,8 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
     }
 
     private String getColumnsStructure(String tableName, String suffix) {
-        List<String> columnNames = getAllColumnsForTable(tableName);
-        List<String> columnDataTypes = getAllColumnsDataType(tableName);
+        List<String> columnNames = tableMetadataProvider.getAllColumnsForTable(tableName);
+        List<String> columnDataTypes = tableMetadataProvider.getAllColumnsDataType(tableName);
 
         boolean applyDelimiter = suffix.equals("_");
         int columnLength = columnNames.size();
@@ -98,20 +60,6 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
                         columnDataTypes.get(i).equalsIgnoreCase("varchar") ? "(100)" : "",
                         applyDelimiter ? "" : ",\n"))
                 .collect(Collectors.joining(!applyDelimiter ? "" : ",\n"));
-    }
-
-    @Override
-    public boolean doesAuditTableExist(String tableName) {
-        String auditTable = "audit_" + tableName;
-        String sql = """
-                SELECT COUNT(*)
-                FROM information_schema.TABLES
-                WHERE table_name = ?
-                AND table_schema = '%s';
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME);
-
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, auditTable);
-        return count > 0;
     }
 
     @Override
@@ -135,8 +83,8 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
 
     private String createTriggerByTableName(String tableName, String auditTable,
                                             TriggerOperation triggerOperation) {
-        List<String> auditTableNames = getAllColumnsForTable(auditTable);
-        List<String> tableNames = getAllColumnsForTable(tableName);
+        List<String> auditTableNames = tableMetadataProvider.getAllColumnsForTable(auditTable);
+        List<String> tableNames = tableMetadataProvider.getAllColumnsForTable(tableName);
 
         String name = tableName.endsWith("s") ? tableName.substring(0, tableName.length() - 1) : tableName;
         String auditColumns = auditTableNames.subList(1, 6).stream()
@@ -197,19 +145,6 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
                     .map(col -> "OLD." + col)
                     .collect(Collectors.joining(", "));
         };
-    }
-
-    @Override
-    public boolean doTriggersExistForTable(String tableName) {
-        String sql = """
-                SELECT COUNT(*)
-                FROM information_schema.TRIGGERS
-                WHERE EVENT_OBJECT_TABLE = ?
-                AND TRIGGER_SCHEMA = '%s';
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME);
-
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tableName);
-        return count > 0;
     }
 
     @Override

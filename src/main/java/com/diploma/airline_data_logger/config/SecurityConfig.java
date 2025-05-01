@@ -16,9 +16,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-//                .requestMatchers("/", "/dashboard/**", "/tables/**").authenticated()
-//                .requestMatchers("/login").permitAll());
-                 .anyRequest().permitAll());
+                .requestMatchers("/", "/dashboard/**", "/tables/**").authenticated()
+                .requestMatchers("/login", "/css/**").permitAll());
+//                 .anyRequest().permitAll());
         http.formLogin(flc -> flc.loginPage("/login")
                 .defaultSuccessUrl("/dashboard")
                 .failureUrl("/login?error=true")

@@ -19,12 +19,17 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     @Override
     public Optional<Employee> findByEmail(String email) {
-        String sql = "SELECT * FROM employees e WHERE e.email = ?";
+        String sql = """
+                SELECT e.employee_id, e.email, e.password, r.name
+                FROM employees e
+                JOIN roles r ON e.role_id = r.role_id
+                WHERE e.email = ?;""";
+
         Employee employee = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new Employee(
                 rs.getInt("employee_id"),
                 rs.getString("email"),
                 rs.getString("password"),
-                rs.getString("role")), email);
+                rs.getString("name")), email);
 
         return Optional.of(employee);
     }
