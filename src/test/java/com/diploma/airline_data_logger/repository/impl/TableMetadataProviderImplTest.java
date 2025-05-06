@@ -18,14 +18,14 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(MockitoExtension.class)
 public class TableMetadataProviderImplTest {
 
+    private static String tableName;
+    private static String auditTable;
+
     @Mock
     private JdbcTemplate jdbcTemplate;
 
     @InjectMocks
-    private TableMetadataProviderImpl tableMetadataProvider;
-
-    private static String tableName;
-    private static String auditTable;
+    private TableMetadataProviderImpl underTest;
 
     @BeforeAll
     static void beforeAll() {
@@ -42,7 +42,7 @@ public class TableMetadataProviderImplTest {
         given(jdbcTemplate.queryForList(anyString(), eq(String.class))).willReturn(tableNames);
 
         // when
-        List<String> result = tableMetadataProvider.getAllTableNames();
+        List<String> result = underTest.getAllTableNames();
 
         // then
         assertThat(result).isEqualTo(tableNames);
@@ -57,7 +57,7 @@ public class TableMetadataProviderImplTest {
                 .willReturn(columns);
 
         // when
-        List<String> result = tableMetadataProvider.getAllColumnsForTable(tableName);
+        List<String> result = underTest.getAllColumnsForTable(tableName);
 
         // then
         assertThat(result).isEqualTo(columns);
@@ -72,7 +72,7 @@ public class TableMetadataProviderImplTest {
                 .willReturn(dataTypes);
 
         // when
-        List<String> result = tableMetadataProvider.getAllColumnsDataType(tableName);
+        List<String> result = underTest.getAllColumnsDataType(tableName);
 
         // then
         assertThat(result).isEqualTo(dataTypes);
@@ -86,7 +86,7 @@ public class TableMetadataProviderImplTest {
                 .willReturn(1);
 
         // when
-        boolean result = tableMetadataProvider.doesAuditTableExist(tableName);
+        boolean result = underTest.doesAuditTableExist(tableName);
 
         // then
         assertThat(result).isTrue();
@@ -99,7 +99,7 @@ public class TableMetadataProviderImplTest {
                 .willReturn(0);
 
         // when
-        boolean result = tableMetadataProvider.doesAuditTableExist(tableName);
+        boolean result = underTest.doesAuditTableExist(tableName);
 
         // then
         assertThat(result).isFalse();
@@ -112,7 +112,7 @@ public class TableMetadataProviderImplTest {
                 .willReturn(3);
 
         // when
-        boolean result = tableMetadataProvider.doTriggersExistForTable(tableName);
+        boolean result = underTest.doTriggersExistForTable(tableName);
 
         // then
         assertThat(result).isTrue();
@@ -125,7 +125,7 @@ public class TableMetadataProviderImplTest {
                 .willReturn(0);
 
         // when
-        boolean result = tableMetadataProvider.doTriggersExistForTable(tableName);
+        boolean result = underTest.doTriggersExistForTable(tableName);
 
         // then
         assertThat(result).isFalse();

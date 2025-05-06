@@ -25,12 +25,21 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
 
     @Override
     public void createAuditTable(String tableName) {
-        String columnsBeforeChange = getColumnsStructure(tableName, "");
-        String columnsAfterChange = getColumnsStructure(tableName, "_");
-        String completeColumnsStructure = columnsBeforeChange + columnsAfterChange;
+        List<String> columnNames = tableMetadataProvider.getAllColumnsForTable(tableName);
+        List<String> columnDataTypes = tableMetadataProvider.getAllColumnsDataType(tableName);
 
+        String columnsBeforeChange = getColumnsStructure(columnNames, columnDataTypes, tableName, "");
+        String columnsAfterChange = getColumnsStructure(columnNames, columnDataTypes, tableName, "_");
+        String sql = createAuditTableSql(tableName, columnsBeforeChange, columnsAfterChange);
+
+        jdbcTemplate.execute(sql);
+    }
+
+    private String createAuditTableSql(String tableName, String columnsBeforeChange, String columnsAfterChange) {
+        String completeColumnsStructure = columnsBeforeChange + columnsAfterChange;
         String auditTable = "audit_" + tableName;
-        String sql = """
+
+        return """
                 CREATE TABLE IF NOT EXISTS %s (
                     audit_id INT AUTO_INCREMENT PRIMARY KEY,
                     date_op DATETIME NOT NULL,
@@ -39,14 +48,10 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
                     host_op VARCHAR(100) NOT NULL,
                 %s
                 );""".formatted(auditTable, completeColumnsStructure);
-
-        jdbcTemplate.execute(sql);
     }
 
-    private String getColumnsStructure(String tableName, String suffix) {
-        List<String> columnNames = tableMetadataProvider.getAllColumnsForTable(tableName);
-        List<String> columnDataTypes = tableMetadataProvider.getAllColumnsDataType(tableName);
-
+    private String getColumnsStructure(List<String> columnNames, List<String> columnDataTypes,
+                                       String tableName, String suffix) {
         boolean applyDelimiter = suffix.equals("_");
         int columnLength = columnNames.size();
 
