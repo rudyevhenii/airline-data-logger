@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,9 +20,9 @@ public class DashboardRepositoryImpl implements DashboardRepository {
     private final JdbcTemplate jdbcTemplate;
     private final TableMetadataProvider tableMetadataProvider;
 
-    public DashboardRepositoryImpl(DataSource dataSource,
+    public DashboardRepositoryImpl(JdbcTemplate jdbcTemplate,
                                    TableMetadataProvider tableMetadataProvider) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.tableMetadataProvider = tableMetadataProvider;
     }
 

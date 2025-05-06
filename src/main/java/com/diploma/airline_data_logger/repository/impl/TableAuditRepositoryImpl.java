@@ -7,7 +7,6 @@ import com.diploma.airline_data_logger.repository.TableMetadataProvider;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -18,9 +17,9 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
     private final JdbcTemplate jdbcTemplate;
     private final TableMetadataProvider tableMetadataProvider;
 
-    public TableAuditRepositoryImpl(DataSource dataSource,
+    public TableAuditRepositoryImpl(JdbcTemplate jdbcTemplate,
                                     TableMetadataProvider tableMetadataProvider) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.jdbcTemplate = jdbcTemplate;
         this.tableMetadataProvider = tableMetadataProvider;
     }
 

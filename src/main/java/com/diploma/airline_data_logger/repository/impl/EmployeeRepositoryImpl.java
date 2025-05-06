@@ -5,7 +5,6 @@ import com.diploma.airline_data_logger.repository.EmployeeRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.util.Optional;
 
 @Repository
@@ -13,8 +12,8 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public EmployeeRepositoryImpl(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public EmployeeRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override

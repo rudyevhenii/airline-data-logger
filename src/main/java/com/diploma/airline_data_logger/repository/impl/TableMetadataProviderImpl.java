@@ -5,7 +5,6 @@ import com.diploma.airline_data_logger.repository.TableMetadataProvider;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.util.List;
 
 @Repository
@@ -13,8 +12,8 @@ public class TableMetadataProviderImpl implements TableMetadataProvider {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public TableMetadataProviderImpl(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public TableMetadataProviderImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
