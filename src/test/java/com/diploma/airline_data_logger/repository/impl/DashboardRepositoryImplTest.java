@@ -67,7 +67,7 @@ class DashboardRepositoryImplTest {
         List<TableSchemaDto> result = underTest.getAllTableSchemas();
 
         // then
-        assertThat(result.size()).isEqualTo(tableNames.size());
+        assertThat(result).hasSameSizeAs(tableNames);
         verify(tableMetadataProvider, times(1)).getAllTableNames();
         verify(tableMetadataProvider, times(tableNames.size())).getAllColumnsForTable(anyString());
         verify(tableMetadataProvider, times(tableNames.size())).doesAuditTableExist(anyString());
@@ -90,9 +90,9 @@ class DashboardRepositoryImplTest {
     @Test
     void givenTableName_whenQuery_thenReturnTableAuditDtoList() {
         // given
-        List<String> auditTableColumns = List.of("audit_id", "date_op", "code_op", "user_op",
-                "host_op", "flight_id_", "departure_time_",
-                "arrival_time_", "origin_", "destination_");
+        List<String> auditTableColumns = List.of("audit_id", "date_op", "code_op", "user_op", "host_op",
+                "flight_id", "departure_time", "arrival_time", "origin", "destination",
+                "departure_time_", "arrival_time_", "origin_", "destination_");
         String startTime = LocalDateTime.now().minusDays(1).toString();
         String endTime = LocalDateTime.now().plusDays(1).toString();
 

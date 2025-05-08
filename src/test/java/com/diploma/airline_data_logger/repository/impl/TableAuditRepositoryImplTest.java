@@ -73,9 +73,9 @@ public class TableAuditRepositoryImplTest {
     @Test
     void givenTableName_whenCreateTriggersForTable_thenReturnNothing() {
         // given
-        List<String> auditTableColumns = List.of("audit_id", "date_op", "code_op", "user_op",
-                "host_op", "flight_id_", "departure_time_",
-                "arrival_time_", "origin_", "destination_");
+        List<String> auditTableColumns = List.of("audit_id", "date_op", "code_op", "user_op", "host_op",
+                "flight_id", "departure_time", "arrival_time", "origin", "destination",
+                "departure_time_", "arrival_time_", "origin_", "destination_");
 
         willDoNothing().given(jdbcTemplate).execute(anyString());
         given(tableMetadataProvider.getAllColumnsForTable(tableName)).willReturn(tableColumns);

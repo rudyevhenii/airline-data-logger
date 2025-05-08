@@ -46,7 +46,7 @@ public class TableMetadataProviderImplTest {
 
         // then
         assertThat(result).isEqualTo(tableNames);
-        assertThat(result.size()).isEqualTo(tableNames.size());
+        assertThat(result).hasSameSizeAs(tableNames);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class TableMetadataProviderImplTest {
 
         // then
         assertThat(result).isEqualTo(columns);
-        assertThat(result.size()).isEqualTo(columns.size());
+        assertThat(result).hasSameSizeAs(columns);
     }
 
     @Test
@@ -76,7 +76,7 @@ public class TableMetadataProviderImplTest {
 
         // then
         assertThat(result).isEqualTo(dataTypes);
-        assertThat(result.size()).isEqualTo(dataTypes.size());
+        assertThat(result).hasSameSizeAs(dataTypes);
     }
 
     @Test
