@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -29,14 +30,14 @@ public class DashboardRepositoryImpl implements DashboardRepository {
     @Override
     public List<TableSchemaDto> getAllTableSchemas() {
         List<TableSchemaDto> tableSchemas = new ArrayList<>();
-        List<String> allTableNames = tableMetadataProvider.getAllTableNames();
+        List<String> tableNames = tableMetadataProvider.getAllTableNames();
 
-        for (String allTableName : allTableNames) {
+        for (String tableName : tableNames) {
             TableSchemaDto tableSchemaDto = new TableSchemaDto(
-                    allTableName,
-                    tableMetadataProvider.getAllColumnsForTable(allTableName),
-                    tableMetadataProvider.doesAuditTableExist(allTableName),
-                    tableMetadataProvider.doTriggersExistForTable(allTableName));
+                    tableName,
+                    tableMetadataProvider.getAllColumnsForTable(tableName),
+                    tableMetadataProvider.doesAuditTableExist(tableName),
+                    tableMetadataProvider.doTriggersExistForTable(tableName));
 
             tableSchemas.add(tableSchemaDto);
         }
@@ -44,7 +45,7 @@ public class DashboardRepositoryImpl implements DashboardRepository {
     }
 
     @Override
-    public List<String> getAllTableAuditColumns(String tableName) {
+    public List<String> getAllAuditTableColumns(String tableName) {
         String auditTable = "audit_" + tableName;
         return tableMetadataProvider.getAllColumnsForTable(auditTable);
     }
@@ -128,7 +129,8 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         String auditTable = "audit_" + tableName;
 
         List<String> tableColumnNames = tableMetadataProvider.getAllColumnsForTable(tableName);
-        TableAuditDto tableAudit = findRecordInAuditTableById(tableName, id);
+        TableAuditDto tableAudit = findRecordInAuditTableById(tableName, id)
+                .orElseThrow(() -> new IllegalStateException("Couldn't find a record with id: " + id));
         List<String> insertValues = tableAudit.getColumnsBeforeChange();
 
         String insertPlaceholders = insertValues.stream()
@@ -157,14 +159,17 @@ public class DashboardRepositoryImpl implements DashboardRepository {
     }
 
     @Override
-    public TableAuditDto findRecordInAuditTableById(String tableName, int id) {
+    public Optional<TableAuditDto> findRecordInAuditTableById(String tableName, int id) {
         String auditTable = "audit_" + tableName;
         String sql = """
                 SELECT * FROM %s
                 WHERE audit_id = %d;
                 """.formatted(auditTable, id);
 
-        return jdbcTemplate.queryForObject(sql, getRowMapperForTableAuditDto(auditTable, tableName));
+        TableAuditDto tableAuditDto = jdbcTemplate.queryForObject(sql,
+                getRowMapperForTableAuditDto(auditTable, tableName));
+
+        return Optional.ofNullable(tableAuditDto);
     }
 
 }

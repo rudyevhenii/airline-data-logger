@@ -20,8 +20,8 @@ public class DashboardService {
         return dashboardRepository.getAllTableSchemas();
     }
 
-    public List<String> getAllTableAuditColumns(String tableName) {
-        return dashboardRepository.getAllTableAuditColumns(tableName);
+    public List<String> getAllAuditTableColumns(String tableName) {
+        return dashboardRepository.getAllAuditTableColumns(tableName);
     }
 
     public List<TableAuditDto> loadDataFromAuditTable(String tableName, String startTime, String endTime) {

@@ -46,7 +46,7 @@ public class DashboardController {
             return "redirect:/dashboard";
         }
         List<TableAuditDto> tableAuditList = dashboardService.loadDataFromAuditTable(tableName, startTime, endTime);
-        List<String> tableAuditColumns = dashboardService.getAllTableAuditColumns(tableName);
+        List<String> tableAuditColumns = dashboardService.getAllAuditTableColumns(tableName);
 
         model.addAttribute("recordCount", tableAuditList.size());
         model.addAttribute("tableName", tableName);

@@ -80,7 +80,7 @@ public class TableMetadataProviderImplTest {
     }
 
     @Test
-    void givenTableName_whenQueryForObject_thenReturnTrueIfAuditTableExists() {
+    void givenTableName_whenAuditTableExists_thenReturnTrue() {
         // given
         given(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(auditTable)))
                 .willReturn(1);
@@ -93,7 +93,7 @@ public class TableMetadataProviderImplTest {
     }
 
     @Test
-    void givenTableName_whenQueryForObject_thenReturnFalseIfAuditTableDoesNotExist() {
+    void givenTableName_whenAuditTableDoesNotExist_thenReturnFalse() {
         // given
         given(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(auditTable)))
                 .willReturn(0);
@@ -106,7 +106,7 @@ public class TableMetadataProviderImplTest {
     }
 
     @Test
-    void givenTableName_whenQueryForObject_thenReturnTrueIfTriggersForTableExist() {
+    void givenTableName_whenTriggersForTableExist_thenReturnTrue() {
         // given
         given(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(tableName)))
                 .willReturn(3);
@@ -119,7 +119,7 @@ public class TableMetadataProviderImplTest {
     }
 
     @Test
-    void givenTableName_whenQueryForObject_thenReturnFalseIfTriggersForTableDoesNotExist() {
+    void givenTableName_whenTriggersForTableDoesNotExist_thenReturnFalse() {
         // given
         given(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), eq(tableName)))
                 .willReturn(0);
