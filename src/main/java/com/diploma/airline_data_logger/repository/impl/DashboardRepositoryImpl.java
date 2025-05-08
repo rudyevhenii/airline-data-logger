@@ -33,10 +33,11 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         List<String> tableNames = tableMetadataProvider.getAllTableNames();
 
         for (String tableName : tableNames) {
+            String auditTable = "audit_" + tableName;
             TableSchemaDto tableSchemaDto = new TableSchemaDto(
                     tableName,
                     tableMetadataProvider.getAllColumnsForTable(tableName),
-                    tableMetadataProvider.doesAuditTableExist(tableName),
+                    tableMetadataProvider.doesTableExist(auditTable),
                     tableMetadataProvider.doTriggersExistForTable(tableName));
 
             tableSchemas.add(tableSchemaDto);
@@ -121,7 +122,9 @@ public class DashboardRepositoryImpl implements DashboardRepository {
 
     @Override
     public boolean doesAuditTableExist(String tableName) {
-        return tableMetadataProvider.doesAuditTableExist(tableName);
+        String auditTable = "audit_" + tableName;
+
+        return tableMetadataProvider.doesTableExist(auditTable);
     }
 
     @Override

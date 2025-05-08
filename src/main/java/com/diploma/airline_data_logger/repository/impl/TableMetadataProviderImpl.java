@@ -57,8 +57,7 @@ public class TableMetadataProviderImpl implements TableMetadataProvider {
     }
 
     @Override
-    public boolean doesAuditTableExist(String tableName) {
-        String auditTable = "audit_" + tableName;
+    public boolean doesTableExist(String tableName) {
         String sql = """
                 SELECT COUNT(*)
                 FROM information_schema.TABLES
@@ -66,7 +65,7 @@ public class TableMetadataProviderImpl implements TableMetadataProvider {
                 AND table_schema = '%s';
                 """.formatted(ProjectConstants.DB_SCHEMA_NAME);
 
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, auditTable);
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tableName);
         return count > 0;
     }
 

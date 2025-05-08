@@ -10,7 +10,7 @@ public interface TableMetadataProvider {
 
     List<String> getAllColumnsDataType(String tableName);
 
-    boolean doesAuditTableExist(String tableName);
+    boolean doesTableExist(String tableName);
 
     boolean doTriggersExistForTable(String tableName);
 

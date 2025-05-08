@@ -64,11 +64,11 @@ public class DashboardServiceTest {
     @Test
     void givenTableName_whenGetAllAuditTableColumns_thenReturnColumnNamesList() {
         // given
-        given(dashboardRepository.getAllAuditTableColumns(auditTable))
+        given(dashboardRepository.getAllAuditTableColumns(tableName))
                 .willReturn(auditTableColumns);
 
         // when
-        List<String> result = underTest.getAllAuditTableColumns(auditTable);
+        List<String> result = underTest.getAllAuditTableColumns(tableName);
 
         // then
         assertThat(result).isEqualTo(auditTableColumns);
@@ -101,11 +101,11 @@ public class DashboardServiceTest {
     @Test
     void givenTableName_whenAuditTableExists_thenReturnTrue() {
         // given
-        given(dashboardRepository.doesAuditTableExist(auditTable))
+        given(dashboardRepository.doesAuditTableExist(tableName))
                 .willReturn(true);
 
         // when
-        boolean result = underTest.doesAuditTableExist(auditTable);
+        boolean result = underTest.doesAuditTableExist(tableName);
 
         // then
         assertThat(result).isTrue();
@@ -114,11 +114,11 @@ public class DashboardServiceTest {
     @Test
     void givenTableName_whenAuditTableDoesNotExist_thenReturnFalse() {
         // given
-        given(dashboardRepository.doesAuditTableExist(auditTable))
+        given(dashboardRepository.doesAuditTableExist(tableName))
                 .willReturn(false);
 
         // when
-        boolean result = underTest.doesAuditTableExist(auditTable);
+        boolean result = underTest.doesAuditTableExist(tableName);
 
         // then
         assertThat(result).isFalse();

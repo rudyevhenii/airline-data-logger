@@ -58,7 +58,7 @@ class DashboardRepositoryImplTest {
                 .willReturn(tableNames);
         given(tableMetadataProvider.getAllColumnsForTable(anyString()))
                 .willReturn(new ArrayList<>());
-        given(tableMetadataProvider.doesAuditTableExist(anyString()))
+        given(tableMetadataProvider.doesTableExist(anyString()))
                 .willReturn(false);
         given(tableMetadataProvider.doTriggersExistForTable(anyString()))
                 .willReturn(false);
@@ -70,14 +70,14 @@ class DashboardRepositoryImplTest {
         assertThat(result).hasSameSizeAs(tableNames);
         verify(tableMetadataProvider, times(1)).getAllTableNames();
         verify(tableMetadataProvider, times(tableNames.size())).getAllColumnsForTable(anyString());
-        verify(tableMetadataProvider, times(tableNames.size())).doesAuditTableExist(anyString());
+        verify(tableMetadataProvider, times(tableNames.size())).doesTableExist(anyString());
         verify(tableMetadataProvider, times(tableNames.size())).doTriggersExistForTable(anyString());
     }
 
     @Test
     void givenTableName_whenGetAllAuditTableColumns_thenReturnAuditTableColumnsList() {
         // given
-        given(tableMetadataProvider.getAllColumnsForTable(eq(auditTable)))
+        given(tableMetadataProvider.getAllColumnsForTable(auditTable))
                 .willReturn(tableColumns);
 
         // when
@@ -85,10 +85,11 @@ class DashboardRepositoryImplTest {
 
         // then
         assertThat(result).isEqualTo(tableColumns);
+        assertThat(result).hasSameSizeAs(tableColumns);
     }
 
     @Test
-    void givenTableName_whenQuery_thenReturnTableAuditDtoList() {
+    void givenTableName_whenLoadDataFromAuditTable_thenReturnTableAuditDtoList() {
         // given
         List<String> auditTableColumns = List.of("audit_id", "date_op", "code_op", "user_op", "host_op",
                 "flight_id", "departure_time", "arrival_time", "origin", "destination",
@@ -96,9 +97,9 @@ class DashboardRepositoryImplTest {
         String startTime = LocalDateTime.now().minusDays(1).toString();
         String endTime = LocalDateTime.now().plusDays(1).toString();
 
-        given(tableMetadataProvider.getAllColumnsForTable(eq(auditTable)))
+        given(tableMetadataProvider.getAllColumnsForTable(auditTable))
                 .willReturn(auditTableColumns);
-        given(tableMetadataProvider.getAllColumnsForTable(eq(tableName)))
+        given(tableMetadataProvider.getAllColumnsForTable(tableName))
                 .willReturn(tableColumns);
         given(jdbcTemplate.query(anyString(), any(RowMapper.class)))
                 .willReturn(anyList());
@@ -114,7 +115,7 @@ class DashboardRepositoryImplTest {
     @Test
     void givenTableName_whenAuditTableExists_thenReturnTrue() {
         // given
-        given(tableMetadataProvider.doesAuditTableExist(eq(tableName)))
+        given(tableMetadataProvider.doesTableExist(auditTable))
                 .willReturn(true);
 
         // when
@@ -127,7 +128,7 @@ class DashboardRepositoryImplTest {
     @Test
     void givenTableName_whenAuditTableDoesNotExist_thenReturnFalse() {
         // given
-        given(tableMetadataProvider.doesAuditTableExist(eq(tableName)))
+        given(tableMetadataProvider.doesTableExist(auditTable))
                 .willReturn(false);
 
         // when
