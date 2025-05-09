@@ -1,7 +1,7 @@
 package com.diploma.airline_data_logger.repository.impl;
 
-import com.diploma.airline_data_logger.constants.ProjectConstants;
 import com.diploma.airline_data_logger.repository.TableMetadataProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +11,9 @@ import java.util.List;
 public class TableMetadataProviderImpl implements TableMetadataProvider {
 
     private final JdbcTemplate jdbcTemplate;
+
+    @Value("${application.database.name}")
+    private String databaseName;
 
     public TableMetadataProviderImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -25,7 +28,7 @@ public class TableMetadataProviderImpl implements TableMetadataProvider {
                 AND table_name <> 'employees'
                 AND table_name <> 'roles'
                 AND NOT table_name LIKE 'audit_%%';
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME);
+                """.formatted(databaseName);
 
         return jdbcTemplate.queryForList(sql, String.class);
     }
@@ -38,7 +41,7 @@ public class TableMetadataProviderImpl implements TableMetadataProvider {
                 WHERE table_name = ?
                 AND table_schema = '%s'
                 ORDER BY ordinal_position;
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME);
+                """.formatted(databaseName);
 
         return jdbcTemplate.queryForList(sql, String.class, tableName);
     }
@@ -51,7 +54,7 @@ public class TableMetadataProviderImpl implements TableMetadataProvider {
                 WHERE table_name = ?
                 AND table_schema = '%s'
                 ORDER BY ordinal_position;
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME);
+                """.formatted(databaseName);
 
         return jdbcTemplate.queryForList(sql, String.class, tableName);
     }
@@ -63,7 +66,7 @@ public class TableMetadataProviderImpl implements TableMetadataProvider {
                 FROM information_schema.TABLES
                 WHERE table_name = ?
                 AND table_schema = '%s';
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME);
+                """.formatted(databaseName);
 
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tableName);
         return count > 0;
@@ -76,7 +79,7 @@ public class TableMetadataProviderImpl implements TableMetadataProvider {
                 FROM information_schema.TRIGGERS
                 WHERE EVENT_OBJECT_TABLE = ?
                 AND TRIGGER_SCHEMA = '%s';
-                """.formatted(ProjectConstants.DB_SCHEMA_NAME);
+                """.formatted(databaseName);
 
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tableName);
         return count > 0;

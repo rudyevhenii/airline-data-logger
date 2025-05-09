@@ -1,9 +1,9 @@
 package com.diploma.airline_data_logger.repository.impl;
 
-import com.diploma.airline_data_logger.constants.ProjectConstants;
 import com.diploma.airline_data_logger.constants.TriggerOperation;
 import com.diploma.airline_data_logger.repository.TableAuditRepository;
 import com.diploma.airline_data_logger.repository.TableMetadataProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +16,9 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final TableMetadataProvider tableMetadataProvider;
+
+    @Value("${application.database.name}")
+    private String databaseName;
 
     public TableAuditRepositoryImpl(JdbcTemplate jdbcTemplate,
                                     TableMetadataProvider tableMetadataProvider) {
@@ -156,7 +159,7 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
         for (TriggerOperation trigger : TriggerOperation.values()) {
             String deleteTrigger = """
                     DROP TRIGGER IF EXISTS `%s`.`%s`;
-                    """.formatted(ProjectConstants.DB_SCHEMA_NAME,
+                    """.formatted(databaseName,
                     "after_%s_%s".formatted(trigger.getOperationNameLowerCase(),
                             tableName.endsWith("s") ? tableName.substring(0, tableName.length() - 1) : tableName));
 
