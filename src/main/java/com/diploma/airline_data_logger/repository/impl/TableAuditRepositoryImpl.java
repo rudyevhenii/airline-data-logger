@@ -60,7 +60,7 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
 
         return IntStream.range(0, columnLength)
                 .filter(i -> tableName.endsWith("s") ? !(tableName.substring(0, tableName.length() - 1) + "_id_")
-                                .equals(columnNames.get(i) + suffix) :
+                        .equals(columnNames.get(i) + suffix) :
                         !(tableName + "_id_").equals(columnNames.get(i) + suffix))
                 .mapToObj(i -> "\t%s %s%s%s".formatted(columnNames.get(i) + suffix,
                         columnDataTypes.get(i),

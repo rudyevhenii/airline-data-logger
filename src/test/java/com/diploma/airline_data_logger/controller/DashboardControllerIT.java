@@ -62,8 +62,8 @@ public class DashboardControllerIT {
 
         List<String> tableNames = jdbcTemplate.queryForList(sql, String.class);
 
-        for (String tableName : tableNames) {
-            jdbcTemplate.execute("DROP TABLE IF EXISTS %s".formatted(tableName));
+        for (String name : tableNames) {
+            jdbcTemplate.execute("DROP TABLE IF EXISTS %s".formatted(name));
         }
         tableAuditRepository.deleteTriggersForTable(tableName);
         jdbcTemplate.execute("DELETE FROM %s".formatted(tableName));
@@ -72,7 +72,7 @@ public class DashboardControllerIT {
     @Test
     void itShouldRedirectToDashboardAndHttp302() throws Exception {
         mockMvc.perform(get("/")
-                .with(user(userDetails)))
+                        .with(user(userDetails)))
                 .andDo(print())
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/dashboard"));
@@ -81,7 +81,7 @@ public class DashboardControllerIT {
     @Test
     void itShouldReturnTableSchemasDtoListAndHttp200() throws Exception {
         mockMvc.perform(get("/dashboard")
-                .with(user(userDetails)))
+                        .with(user(userDetails)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("dashboard"))
@@ -95,7 +95,7 @@ public class DashboardControllerIT {
 
         mockMvc.perform(get("/dashboard/table-audit/{tableName}" +
                         "?startTime={startTime}&endTime={endTime}", tableName, startTime, endTime)
-                .with(user(userDetails)))
+                        .with(user(userDetails)))
                 .andDo(print())
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/dashboard"));
@@ -107,15 +107,15 @@ public class DashboardControllerIT {
         String endTime = LocalDateTime.now().minusDays(1).toString();
 
         mockMvc.perform(get("/tables/create-log-table/{tableName}", tableName)
-                .with(user(userDetails)))
+                        .with(user(userDetails)))
                 .andDo(print())
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/dashboard"))
                 .andExpect(flash().attributeExists("successMessage"));
 
         mockMvc.perform(get("/dashboard/table-audit/{tableName}" +
-                "?startTime={startTime}&endTime={endTime}", tableName, startTime, endTime)
-                .with(user(userDetails)))
+                        "?startTime={startTime}&endTime={endTime}", tableName, startTime, endTime)
+                        .with(user(userDetails)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("audit-table"))
@@ -147,7 +147,7 @@ public class DashboardControllerIT {
         jdbcTemplate.execute(deleteRecord);
 
         mockMvc.perform(get("/dashboard/restore/{tableName}?id={id}", tableName, restoreId)
-                .with(user(userDetails)))
+                        .with(user(userDetails)))
                 .andDo(print())
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attributeExists("successMessage"))
