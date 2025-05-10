@@ -10,12 +10,12 @@ public class LoginController {
 
     @GetMapping(value = "/login")
     public String getLoginPage(@RequestParam(name = "error", required = false) boolean hasError,
-                               @RequestParam(name = "logout", required = false) String logout,
+                               @RequestParam(name = "logout", required = false) boolean logout,
                                Model model) {
         if (hasError) {
             throw new IllegalArgumentException("Email or Password is incorrect!");
         }
-        if (logout != null) {
+        if (logout) {
             model.addAttribute("successMessage", "You have successfully logged out!");
         }
         return "login";

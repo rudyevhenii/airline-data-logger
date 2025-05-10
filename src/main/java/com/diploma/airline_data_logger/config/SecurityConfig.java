@@ -18,13 +18,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                 .requestMatchers("/", "/dashboard/**", "/tables/**").authenticated()
                 .requestMatchers("/login", "/css/**").permitAll());
-//                 .anyRequest().permitAll());
         http.formLogin(flc -> flc.loginPage("/login")
                 .defaultSuccessUrl("/dashboard")
                 .failureUrl("/login?error=true")
                 .usernameParameter("email")
                 .passwordParameter("password"));
-        http.logout(logoutConfig -> logoutConfig.logoutSuccessUrl("/login?logout")
+        http.logout(logoutConfig -> logoutConfig.logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .deleteCookies("JSESSIONID"));

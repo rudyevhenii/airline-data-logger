@@ -1,7 +1,6 @@
 package com.diploma.airline_data_logger.controller;
 
 import com.diploma.airline_data_logger.repository.TableAuditRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,9 +45,6 @@ public class DashboardControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
