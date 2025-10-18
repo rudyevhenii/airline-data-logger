@@ -111,15 +111,9 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
                         NOW(), '%c', USER(), @@hostname, %s
                     );
                 END;""".formatted(
-                triggerOperation.getOperationNameLowerCase(),
-                name,
-                triggerOperation.getOperationNameUpperCase(),
-                tableName,
-                auditTable,
-                auditColumns,
-                auditColumnsByTrigger,
-                triggerOperation.getOperationNameUpperCase().charAt(0),
-                valueByTrigger);
+                triggerOperation.getOperationNameLowerCase(), name, triggerOperation.getOperationNameUpperCase(),
+                tableName, auditTable, auditColumns, auditColumnsByTrigger,
+                triggerOperation.getOperationNameUpperCase().charAt(0), valueByTrigger);
 
         return trigger;
     }

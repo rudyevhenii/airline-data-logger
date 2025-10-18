@@ -1,5 +1,4 @@
 DROP SCHEMA IF EXISTS `airline_data_logger`;
--- Users creation in the database
 CREATE SCHEMA IF NOT EXISTS `airline_data_logger`;
 
 USE `airline_data_logger`;

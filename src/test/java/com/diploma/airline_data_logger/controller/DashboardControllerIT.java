@@ -153,6 +153,5 @@ public class DashboardControllerIT {
                 .andExpect(flash().attributeExists("successMessage"))
                 .andExpect(redirectedUrl("/dashboard/table-audit/%s".formatted(tableName)));
     }
+
 }
-
-

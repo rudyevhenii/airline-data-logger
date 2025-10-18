@@ -51,5 +51,5 @@ public class LoginControllerIT {
                 .andExpect(model().attributeExists("successMessage"))
                 .andExpect(view().name("login"));
     }
-}
 
+}
