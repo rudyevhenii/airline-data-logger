@@ -2,6 +2,7 @@ package com.diploma.airline_data_logger.service;
 
 import com.diploma.airline_data_logger.repository.TableAuditRepository;
 import com.diploma.airline_data_logger.repository.TableMetadataProvider;
+import com.diploma.airline_data_logger.service.impl.TableAuditServiceImpl;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ public class TableAuditServiceTest {
     private TableMetadataProvider tableMetadataProvider;
 
     @InjectMocks
-    private TableAuditService underTest;
+    private TableAuditServiceImpl underTest;
 
     @BeforeAll
     static void beforeAll() {

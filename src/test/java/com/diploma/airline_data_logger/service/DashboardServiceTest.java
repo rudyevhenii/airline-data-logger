@@ -3,6 +3,7 @@ package com.diploma.airline_data_logger.service;
 import com.diploma.airline_data_logger.dto.TableAuditDto;
 import com.diploma.airline_data_logger.dto.TableSchemaDto;
 import com.diploma.airline_data_logger.repository.DashboardRepository;
+import com.diploma.airline_data_logger.service.impl.DashboardServiceImpl;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ public class DashboardServiceTest {
     private DashboardRepository dashboardRepository;
 
     @InjectMocks
-    private DashboardService underTest;
+    private DashboardServiceImpl underTest;
 
     @BeforeAll
     static void beforeAll() {
