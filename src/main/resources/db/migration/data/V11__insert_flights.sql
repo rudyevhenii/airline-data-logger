@@ -1,0 +1,18 @@
+INSERT INTO flights (departure_time, arrival_time, origin, destination) VALUES ('2025-05-01 08:00:00', '2025-05-01 12:00:00', 'LAX', 'JFK');
+UPDATE flights SET destination = 'BOS' WHERE flight_id = 1;
+INSERT INTO flights (departure_time, arrival_time, origin, destination) VALUES ('2025-06-15 14:00:00', '2025-06-15 18:30:00', 'ORD', 'ATL');
+DELETE FROM flights WHERE flight_id = 2;
+INSERT INTO flights (departure_time, arrival_time, origin, destination) VALUES ('2025-07-03 06:00:00', '2025-07-03 09:00:00', 'SEA', 'DEN');
+UPDATE flights SET departure_time = '2025-07-03 07:00:00' WHERE flight_id = 3;
+INSERT INTO flights (departure_time, arrival_time, origin, destination) VALUES ('2025-08-20 16:00:00', '2025-08-20 20:00:00', 'MIA', 'DFW');
+UPDATE flights SET origin = 'PHX' WHERE flight_id = 4;
+INSERT INTO flights (departure_time, arrival_time, origin, destination) VALUES ('2025-09-10 13:00:00', '2025-09-10 17:00:00', 'SFO', 'LAS');
+UPDATE flights SET arrival_time = '2025-09-10 17:30:00' WHERE flight_id = 5;
+INSERT INTO flights (departure_time, arrival_time, origin, destination) VALUES ('2025-10-01 10:00:00', '2025-10-01 14:00:00', 'JFK', 'LAX');
+DELETE FROM flights WHERE flight_id = 1;
+INSERT INTO flights (departure_time, arrival_time, origin, destination) VALUES ('2025-11-12 05:00:00', '2025-11-12 08:30:00', 'DEN', 'ORD');
+UPDATE flights SET destination = 'SLC' WHERE flight_id = 6;
+INSERT INTO flights (departure_time, arrival_time, origin, destination) VALUES ('2025-12-24 20:00:00', '2025-12-25 00:00:00', 'ATL', 'PHL');
+UPDATE flights SET origin = 'IAD' WHERE flight_id = 7;
+DELETE FROM flights WHERE flight_id = 4;
+UPDATE flights SET departure_time = '2025-10-01 09:30:00' WHERE flight_id = 8;

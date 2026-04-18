@@ -1,0 +1,13 @@
+INSERT INTO crew (first_name, last_name, email, phone, role_id) VALUES ('Alice', 'Walker', 'alice.walker@example.com', '555-1000', 1);
+UPDATE crew SET phone = '555-2000' WHERE crew_id = 1;
+INSERT INTO crew (first_name, last_name, email, phone, role_id) VALUES ('Bob', 'Johnson', 'bob.j@example.com', '555-1001', 4);
+DELETE FROM crew WHERE crew_id = 2;
+INSERT INTO crew (first_name, last_name, email, phone, role_id) VALUES ('Carol', 'Smith', 'carol.smith@example.com', '555-1002', 1);
+UPDATE crew SET email = 'carol.s@example.com' WHERE crew_id = 1;
+INSERT INTO crew (first_name, last_name, email, phone, role_id) VALUES ('David', 'Miller', 'david.m@example.com', '555-1003', 5);
+UPDATE crew SET role_id = 5 WHERE crew_id = 3;
+INSERT INTO crew (first_name, last_name, email, phone, role_id) VALUES ('Eva', 'Brown', 'eva.b@example.com', '555-1004', 1);
+UPDATE crew SET first_name = 'Evelyn' WHERE crew_id = 4;
+INSERT INTO crew (first_name, last_name, email, phone, role_id) VALUES ('Frank', 'Lopez', 'frank.l@example.com', '555-1005', 1);
+DELETE FROM crew WHERE crew_id = 1;
+UPDATE crew SET last_name = 'Lewis' WHERE crew_id = 3;

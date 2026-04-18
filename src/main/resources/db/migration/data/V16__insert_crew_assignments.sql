@@ -1,0 +1,12 @@
+INSERT INTO crew_assignments (flight_id, crew_id) VALUES (5, 3);
+UPDATE crew_assignments SET flight_id = 6 WHERE assignment_id = 1;
+INSERT INTO crew_assignments (flight_id, crew_id) VALUES (6, 4);
+DELETE FROM crew_assignments WHERE assignment_id = 2;
+INSERT INTO crew_assignments (flight_id, crew_id) VALUES (7, 3);
+UPDATE crew_assignments SET crew_id = 5 WHERE assignment_id = 1;
+INSERT INTO crew_assignments (flight_id, crew_id) VALUES (8, 4);
+UPDATE crew_assignments SET flight_id = 5 WHERE assignment_id = 3;
+INSERT INTO crew_assignments (flight_id, crew_id) VALUES (6, 5);
+DELETE FROM crew_assignments WHERE assignment_id = 3;
+INSERT INTO crew_assignments (flight_id, crew_id) VALUES (7, 5);
+UPDATE crew_assignments SET crew_id = 3 WHERE assignment_id = 1;

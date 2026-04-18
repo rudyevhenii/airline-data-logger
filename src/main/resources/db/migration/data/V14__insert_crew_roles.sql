@@ -1,0 +1,14 @@
+INSERT INTO crew_roles (role_name, description) VALUES ('Pilot', 'Responsible for flying the aircraft');
+UPDATE crew_roles SET description = 'Leads the flight crew and flies the plane' WHERE role_id = 1;
+INSERT INTO crew_roles (role_name, description) VALUES ('Co-Pilot', 'Assists the pilot');
+DELETE FROM crew_roles WHERE role_id = 2;
+INSERT INTO crew_roles (role_name, description) VALUES ('Flight Attendant', 'Ensures passenger safety and comfort');
+UPDATE crew_roles SET role_name = 'Senior Pilot' WHERE role_id = 1;
+INSERT INTO crew_roles (role_name, description) VALUES ('Navigator', 'Assists with route planning and navigation');
+UPDATE crew_roles SET description = 'Cabin crew, serves meals' WHERE role_id = 3;
+INSERT INTO crew_roles (role_name, description) VALUES ('Engineer', 'Monitors aircraft systems');
+UPDATE crew_roles SET role_name = 'Flight Engineer' WHERE role_id = 4;
+INSERT INTO crew_roles (role_name, description) VALUES ('Purser', 'Leads the flight attendants');
+DELETE FROM crew_roles WHERE role_id = 3;
+INSERT INTO crew_roles (role_name, description) VALUES ('Dispatcher', 'Coordinates flights from the ground');
+UPDATE crew_roles SET description = 'Handles flight dispatch and communications' WHERE role_id = 5;

@@ -1,0 +1,14 @@
+INSERT INTO bookings (flight_id, passenger_id, seat_number) VALUES (3, 3, '12A');
+UPDATE bookings SET seat_number = '12B' WHERE booking_id = 1;
+INSERT INTO bookings (flight_id, passenger_id, seat_number) VALUES (5, 4, '14C');
+DELETE FROM bookings WHERE booking_id = 2;
+INSERT INTO bookings (flight_id, passenger_id, seat_number) VALUES (6, 3, '15F');
+UPDATE bookings SET flight_id = 5 WHERE booking_id = 3;
+INSERT INTO bookings (flight_id, passenger_id, seat_number) VALUES (7, 5, '10A');
+UPDATE bookings SET passenger_id = 5 WHERE booking_id = 1;
+INSERT INTO bookings (flight_id, passenger_id, seat_number) VALUES (5, 5, '9B');
+UPDATE bookings SET seat_number = '9A' WHERE booking_id = 4;
+INSERT INTO bookings (flight_id, passenger_id, seat_number) VALUES (8, 3, '11C');
+DELETE FROM bookings WHERE booking_id = 3;
+INSERT INTO bookings (flight_id, passenger_id, seat_number) VALUES (6, 4, '8D');
+UPDATE bookings SET seat_number = '8C' WHERE booking_id = 5;

@@ -1,0 +1,14 @@
+INSERT INTO passengers (first_name, last_name, email, passport_no) VALUES ('John', 'Doe', 'john.doe@example.com', 'X12345678');
+UPDATE passengers SET email = 'johnny.doe@example.com' WHERE passenger_id = 1;
+INSERT INTO passengers (first_name, last_name, email, passport_no) VALUES ('Jane', 'Smith', 'jane.smith@example.com', 'Y98765432');
+DELETE FROM passengers WHERE passenger_id = 2;
+INSERT INTO passengers (first_name, last_name, email, passport_no) VALUES ('Alex', 'Brown', 'alex.brown@example.com', 'A56473829');
+UPDATE passengers SET passport_no = 'A00000000' WHERE passenger_id = 1;
+INSERT INTO passengers (first_name, last_name, email, passport_no) VALUES ('Emily', 'Davis', 'emily.davis@example.com', 'C11112222');
+UPDATE passengers SET last_name = 'Johnson' WHERE passenger_id = 3;
+INSERT INTO passengers (first_name, last_name, email, passport_no) VALUES ('Daniel', 'White', 'dan.white@example.com', 'Z34567890');
+UPDATE passengers SET email = 'd.white@example.com' WHERE passenger_id = 4;
+INSERT INTO passengers (first_name, last_name, email, passport_no) VALUES ('Sophia', 'Taylor', 'sophia.taylor@example.com', 'W22334455');
+DELETE FROM passengers WHERE passenger_id = 1;
+INSERT INTO passengers (first_name, last_name, email, passport_no) VALUES ('Michael', 'Lee', 'michael.lee@example.com', 'B99887766');
+UPDATE passengers SET first_name = 'Mike' WHERE passenger_id = 5;
