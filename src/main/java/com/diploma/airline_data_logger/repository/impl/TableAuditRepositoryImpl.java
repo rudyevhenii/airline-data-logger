@@ -3,6 +3,8 @@ package com.diploma.airline_data_logger.repository.impl;
 import com.diploma.airline_data_logger.constants.TriggerOperation;
 import com.diploma.airline_data_logger.repository.TableAuditRepository;
 import com.diploma.airline_data_logger.repository.TableMetadataProvider;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -11,20 +13,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.diploma.airline_data_logger.query.SqlQuery.*;
+
+@Slf4j
 @Repository
+@RequiredArgsConstructor
 public class TableAuditRepositoryImpl implements TableAuditRepository {
+
+    private static final String AUDIT_TABLE_PREFIX = "audit_";
 
     private final JdbcTemplate jdbcTemplate;
     private final TableMetadataProvider tableMetadataProvider;
 
     @Value("${application.database.name}")
     private String databaseName;
-
-    public TableAuditRepositoryImpl(JdbcTemplate jdbcTemplate,
-                                    TableMetadataProvider tableMetadataProvider) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.tableMetadataProvider = tableMetadataProvider;
-    }
 
     @Override
     public void createAuditTable(String tableName) {
@@ -40,25 +42,15 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
 
     private String createAuditTableSql(String tableName, String columnsBeforeChange, String columnsAfterChange) {
         String completeColumnsStructure = columnsBeforeChange + columnsAfterChange;
-        String auditTable = "audit_" + tableName;
 
-        return """
-                CREATE TABLE IF NOT EXISTS %s (
-                    audit_id INT AUTO_INCREMENT PRIMARY KEY,
-                    date_op DATETIME NOT NULL,
-                    code_op CHAR(1) NOT NULL,
-                    user_op VARCHAR(100) NOT NULL,
-                    host_op VARCHAR(100) NOT NULL,
-                %s
-                );""".formatted(auditTable, completeColumnsStructure);
+        return CREATE_TABLE_IF_NOT_EXISTS_SQL.formatted(AUDIT_TABLE_PREFIX + tableName, completeColumnsStructure);
     }
 
     private String getColumnsStructure(List<String> columnNames, List<String> columnDataTypes,
                                        String tableName, String suffix) {
         boolean applyDelimiter = suffix.equals("_");
-        int columnLength = columnNames.size();
 
-        return IntStream.range(0, columnLength)
+        return IntStream.range(0, columnNames.size())
                 .filter(i -> tableName.endsWith("s") ? !(tableName.substring(0, tableName.length() - 1) + "_id_")
                         .equals(columnNames.get(i) + suffix) :
                         !(tableName + "_id_").equals(columnNames.get(i) + suffix))
@@ -71,18 +63,16 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
 
     @Override
     public void deleteAuditTable(String tableName) {
-        String auditTable = "audit_" + tableName;
-        String sql = "DROP TABLE IF EXISTS %s".formatted(auditTable);
+        String sql = DROP_TABLE_IF_EXISTS_SQL.formatted(AUDIT_TABLE_PREFIX + tableName);
 
         jdbcTemplate.execute(sql);
     }
 
     @Override
     public void createTriggersForTable(String tableName) {
-        String auditTable = "audit_" + tableName;
-
         for (TriggerOperation triggerOperation : TriggerOperation.values()) {
-            String trigger = createTriggerByTableName(tableName, auditTable, triggerOperation);
+            String trigger = createTriggerByTableName(tableName, AUDIT_TABLE_PREFIX + tableName,
+                    triggerOperation);
 
             jdbcTemplate.execute(trigger);
         }
@@ -100,21 +90,12 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
         String auditColumnsByTrigger = getAuditColumnsByTrigger(auditTableNames, tableNames, triggerOperation);
         String valueByTrigger = getValueByTrigger(tableNames, triggerOperation);
 
-        String trigger = """
-                CREATE TRIGGER after_%s_%s
-                AFTER %s ON %s
-                FOR EACH ROW
-                BEGIN
-                    INSERT INTO %s (
-                        %s%s
-                    ) VALUES (
-                        NOW(), '%c', USER(), @@hostname, %s
-                    );
-                END;""".formatted(
+        String trigger = CREATE_TRIGGER_SQL.formatted(
                 triggerOperation.getOperationNameLowerCase(), name, triggerOperation.getOperationNameUpperCase(),
                 tableName, auditTable, auditColumns, auditColumnsByTrigger,
                 triggerOperation.getOperationNameUpperCase().charAt(0), valueByTrigger);
 
+        log.info("Created trigger for {} operation: {}", triggerOperation, trigger);
         return trigger;
     }
 
@@ -151,9 +132,7 @@ public class TableAuditRepositoryImpl implements TableAuditRepository {
     @Override
     public void deleteTriggersForTable(String tableName) {
         for (TriggerOperation trigger : TriggerOperation.values()) {
-            String deleteTrigger = """
-                    DROP TRIGGER IF EXISTS `%s`.`%s`;
-                    """.formatted(databaseName,
+            String deleteTrigger = DROP_TRIGGER_IF_EXISTS.formatted(databaseName,
                     "after_%s_%s".formatted(trigger.getOperationNameLowerCase(),
                             tableName.endsWith("s") ? tableName.substring(0, tableName.length() - 1) : tableName));
 

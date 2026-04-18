@@ -1,13 +1,18 @@
 package com.diploma.airline_data_logger.repository.impl;
 
 import com.diploma.airline_data_logger.repository.TableMetadataProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+
+import static com.diploma.airline_data_logger.query.SqlQuery.*;
 
 @Repository
+@RequiredArgsConstructor
 public class TableMetadataProviderImpl implements TableMetadataProvider {
 
     private final JdbcTemplate jdbcTemplate;
@@ -15,74 +20,38 @@ public class TableMetadataProviderImpl implements TableMetadataProvider {
     @Value("${application.database.name}")
     private String databaseName;
 
-    public TableMetadataProviderImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     @Override
     public List<String> getAllTableNames() {
-        String sql = """
-                SELECT table_name
-                FROM information_schema.TABLES
-                WHERE table_schema = '%s'
-                AND table_name <> 'employees'
-                AND table_name <> 'roles'
-                AND NOT table_name LIKE 'audit_%%';
-                """.formatted(databaseName);
-
-        return jdbcTemplate.queryForList(sql, String.class);
+        return jdbcTemplate.queryForList(SELECT_ALL_TABLE_NAMES_SQL.formatted(databaseName),
+                String.class);
     }
 
     @Override
     public List<String> getAllColumnsForTable(String tableName) {
-        String sql = """
-                SELECT column_name
-                FROM information_schema.COLUMNS
-                WHERE table_name = ?
-                AND table_schema = '%s'
-                ORDER BY ordinal_position;
-                """.formatted(databaseName);
-
-        return jdbcTemplate.queryForList(sql, String.class, tableName);
+        return jdbcTemplate.queryForList(SELECT_ALL_TABLE_COLUMNS_SQL.formatted(databaseName),
+                String.class, tableName);
     }
 
     @Override
     public List<String> getAllColumnsDataType(String tableName) {
-        String sql = """
-                SELECT data_type
-                FROM information_schema.COLUMNS
-                WHERE table_name = ?
-                AND table_schema = '%s'
-                ORDER BY ordinal_position;
-                """.formatted(databaseName);
-
-        return jdbcTemplate.queryForList(sql, String.class, tableName);
+        return jdbcTemplate.queryForList(SELECT_ALL_DATA_TYPE_COLUMNS_SQL.formatted(databaseName),
+                String.class, tableName);
     }
 
     @Override
     public boolean doesTableExist(String tableName) {
-        String sql = """
-                SELECT COUNT(*)
-                FROM information_schema.TABLES
-                WHERE table_name = ?
-                AND table_schema = '%s';
-                """.formatted(databaseName);
-
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tableName);
-        return count > 0;
+        Optional<Integer> countOptional = Optional.ofNullable(jdbcTemplate.queryForObject(SELECT_COUNT_TABLES_SQL
+                        .formatted(databaseName), Integer.class, tableName));
+        return countOptional.map(count -> count > 0)
+                .orElse(false);
     }
 
     @Override
     public boolean doTriggersExistForTable(String tableName) {
-        String sql = """
-                SELECT COUNT(*)
-                FROM information_schema.TRIGGERS
-                WHERE EVENT_OBJECT_TABLE = ?
-                AND TRIGGER_SCHEMA = '%s';
-                """.formatted(databaseName);
-
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tableName);
-        return count > 0;
+        Optional<Integer> countOptional = Optional.ofNullable(jdbcTemplate.queryForObject(SELECT_COUNT_TABLE_TRIGGERS_SQL
+                .formatted(databaseName), Integer.class, tableName));
+        return countOptional.map(count -> count > 0)
+                .orElse(false);
     }
 
 }

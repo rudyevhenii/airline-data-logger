@@ -4,80 +4,30 @@ import com.diploma.airline_data_logger.repository.TableAuditRepository;
 import com.diploma.airline_data_logger.repository.TableMetadataProvider;
 import com.diploma.airline_data_logger.service.EmailService;
 import com.diploma.airline_data_logger.service.TableAuditService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
+@RequiredArgsConstructor
 public class TableAuditServiceImpl implements TableAuditService {
 
-    private static final Logger logger = LoggerFactory.getLogger(TableAuditServiceImpl.class);
+    private static final String AUDIT_TABLE_PREFIX = "audit_";
 
     private final TableAuditRepository tableAuditRepository;
     private final TableMetadataProvider tableMetadataProvider;
     private final EmailService emailService;
 
-    public TableAuditServiceImpl(TableAuditRepository tableAuditRepository,
-                             TableMetadataProvider tableMetadataProvider,
-                             EmailService emailService) {
-        this.tableAuditRepository = tableAuditRepository;
-        this.tableMetadataProvider = tableMetadataProvider;
-        this.emailService = emailService;
-    }
-
     @Override
     public String createAuditTableByTableName(String tableName) {
-        String auditTable = "audit_" + tableName;
+        String auditTable = AUDIT_TABLE_PREFIX + tableName;
 
         if (tableMetadataProvider.doesTableExist(auditTable)) {
             throw new IllegalStateException("'%s' table already exists.".formatted(auditTable));
         }
         tableAuditRepository.createAuditTable(tableName);
-
-        try {
-            String adminEmail = getCurrentAdminEmail();
-            if (adminEmail != null) {
-                String subject = "Audit Table Creation Confirmation [Airline Data Logger]";
-                String text = String.format(
-                        "You have successfully created a new audit table.\n\n" +
-                                "Operation Details:\n" +
-                                "  Original Table: %s\n" +
-                                "  New Audit Table: %s\n" +
-                                "  Operation Time: %s\n",
-                        tableName, auditTable, LocalDateTime.now()
-                );
-
-                emailService.sendSimpleMessage(adminEmail, subject, text);
-            } else {
-                logger.warn("Could not retrieve current admin email. Audit creation notification not sent.");
-            }
-        } catch (Exception e) {
-            logger.error("Failed to send email notification for audit table creation: {}", e.getMessage());
-        }
+        emailService.sendSimpleMessage(tableName);
 
         return "'%s' table successfully created!".formatted(auditTable);
-    }
-
-    private String getCurrentAdminEmail() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof UserDetails) {
-            return ((UserDetails) principal).getUsername();
-        } else if (principal instanceof String) {
-            return (String) principal;
-        }
-
-        logger.warn("Could not determine Principal type: {}", principal.getClass().getName());
-        return null;
     }
 
     @Override
@@ -93,7 +43,7 @@ public class TableAuditServiceImpl implements TableAuditService {
     }
 
     private void throwExceptionIfAuditTableDoesNotExist(String tableName) {
-        String auditTable = "audit_" + tableName;
+        String auditTable = AUDIT_TABLE_PREFIX + tableName;
         if (!tableMetadataProvider.doesTableExist(auditTable)) {
             throw new IllegalStateException("Audit table should be created first!");
         }
@@ -113,7 +63,7 @@ public class TableAuditServiceImpl implements TableAuditService {
 
     @Override
     public String deleteAuditTableByTableName(String tableName) {
-        String auditTable = "audit_" + tableName;
+        String auditTable = AUDIT_TABLE_PREFIX + tableName;
         throwExceptionIfAuditTableDoesNotExist(tableName);
 
         if (tableMetadataProvider.doTriggersExistForTable(tableName)) {

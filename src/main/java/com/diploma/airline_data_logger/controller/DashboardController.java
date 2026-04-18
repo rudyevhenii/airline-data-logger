@@ -3,6 +3,7 @@ package com.diploma.airline_data_logger.controller;
 import com.diploma.airline_data_logger.dto.TableAuditDto;
 import com.diploma.airline_data_logger.dto.TableSchemaDto;
 import com.diploma.airline_data_logger.service.DashboardService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,13 +14,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
 public class DashboardController {
 
     private final DashboardService dashboardService;
-
-    public DashboardController(DashboardService dashboardService) {
-        this.dashboardService = dashboardService;
-    }
 
     @GetMapping("/")
     public String redirectToDashboard() {

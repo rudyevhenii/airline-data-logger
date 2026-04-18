@@ -1,6 +1,7 @@
 package com.diploma.airline_data_logger.controller;
 
 import com.diploma.airline_data_logger.service.TableAuditService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,13 +10,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/tables")
+@RequiredArgsConstructor
 public class TableAuditController {
 
     private final TableAuditService tableAuditService;
-
-    public TableAuditController(TableAuditService tableAuditService) {
-        this.tableAuditService = tableAuditService;
-    }
 
     @GetMapping("/create-log-table/{tableName}")
     public String createAuditTable(@PathVariable String tableName,

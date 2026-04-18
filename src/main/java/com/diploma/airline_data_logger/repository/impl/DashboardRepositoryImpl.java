@@ -2,105 +2,98 @@ package com.diploma.airline_data_logger.repository.impl;
 
 import com.diploma.airline_data_logger.dto.TableAuditDto;
 import com.diploma.airline_data_logger.dto.TableSchemaDto;
+import com.diploma.airline_data_logger.mapper.TableAutidDtoRowMapper;
 import com.diploma.airline_data_logger.repository.DashboardRepository;
 import com.diploma.airline_data_logger.repository.TableMetadataProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.diploma.airline_data_logger.query.SqlQuery.SELECT_ALL_WHERE_SQL;
+import static com.diploma.airline_data_logger.query.SqlQuery.UPSERT_RECORD_SQL;
+
 @Repository
+@RequiredArgsConstructor
 public class DashboardRepositoryImpl implements DashboardRepository {
+
+    private static final String AUDIT_TABLE_PREFIX = "audit_";
 
     private final JdbcTemplate jdbcTemplate;
     private final TableMetadataProvider tableMetadataProvider;
 
-    public DashboardRepositoryImpl(JdbcTemplate jdbcTemplate,
-                                   TableMetadataProvider tableMetadataProvider) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.tableMetadataProvider = tableMetadataProvider;
-    }
-
     @Override
     public List<TableSchemaDto> getAllTableSchemas() {
-        List<TableSchemaDto> tableSchemas = new ArrayList<>();
         List<String> tableNames = tableMetadataProvider.getAllTableNames();
 
-        for (String tableName : tableNames) {
-            String auditTable = "audit_" + tableName;
-            TableSchemaDto tableSchemaDto = new TableSchemaDto(
-                    tableName,
-                    tableMetadataProvider.getAllColumnsForTable(tableName),
-                    tableMetadataProvider.doesTableExist(auditTable),
-                    tableMetadataProvider.doTriggersExistForTable(tableName));
-
-            tableSchemas.add(tableSchemaDto);
-        }
-        return tableSchemas;
+        return tableNames.stream()
+                .map(this::getTableSchemaDto)
+                .toList();
     }
 
     @Override
     public List<String> getAllAuditTableColumns(String tableName) {
-        String auditTable = "audit_" + tableName;
-        return tableMetadataProvider.getAllColumnsForTable(auditTable);
+        return tableMetadataProvider.getAllColumnsForTable(AUDIT_TABLE_PREFIX + tableName);
     }
 
     @Override
     public List<TableAuditDto> loadDataFromAuditTable(String tableName,
                                                       String startTime, String endTime) {
-        String auditTable = "audit_" + tableName;
+        String auditTable = AUDIT_TABLE_PREFIX + tableName;
         String sql = getDateFiltrationSql(auditTable, startTime, endTime);
 
-        return jdbcTemplate.query(sql, getRowMapperForTableAuditDto(auditTable, tableName));
+        return jdbcTemplate.query(sql, new TableAutidDtoRowMapper(tableMetadataProvider, tableName, auditTable));
     }
 
-    private RowMapper<TableAuditDto> getRowMapperForTableAuditDto(String auditTable, String tableName) {
-        List<String> auditTableColumnNames = tableMetadataProvider.getAllColumnsForTable(auditTable);
+    @Override
+    public boolean doesAuditTableExist(String tableName) {
+        String auditTable = AUDIT_TABLE_PREFIX + tableName;
+
+        return tableMetadataProvider.doesTableExist(auditTable);
+    }
+
+    @Override
+    public boolean restoreRecord(String tableName, int id) {
         List<String> tableColumnNames = tableMetadataProvider.getAllColumnsForTable(tableName);
+        TableAuditDto tableAudit = findRecordInAuditTableById(tableName, id)
+                .orElseThrow(() -> new IllegalStateException("Couldn't find a record with id: " + id));
+        List<String> insertValues = tableAudit.getColumnsBeforeChange();
 
-        return new RowMapper<TableAuditDto>() {
+        String insertPlaceholders = getInsertPlaceHolders(tableAudit.getColumnsBeforeChange());
+        String valueAlias = getValueAlias(tableName);
+        String updateStructure = getUpdateStructure(tableColumnNames, valueAlias);
 
-            @Override
-            public TableAuditDto mapRow(ResultSet rs, int rowNum) throws SQLException {
-                TableAuditDto tableAuditDto = new TableAuditDto();
-                tableAuditDto.setId(rs.getInt("audit_id"));
-                tableAuditDto.setDateOp(rs.getString("date_op"));
-                tableAuditDto.setCodeOp(rs.getString("code_op"));
-                tableAuditDto.setUserOp(rs.getString("user_op"));
-                tableAuditDto.setHostOp(rs.getString("host_op"));
-                tableAuditDto.setTableId(rs.getInt(auditTableColumnNames.get(5)));
+        String sql = UPSERT_RECORD_SQL.formatted(tableName,
+                String.join(", ", tableColumnNames),
+                tableAudit.getTableId(),
+                insertPlaceholders,
+                valueAlias,
+                updateStructure);
 
-                List<String> columnsBeforeChange = auditTableColumnNames
-                        .subList(6, auditTableColumnNames.size() - tableColumnNames.size() + 1);
-                List<String> columnsAfterChange = auditTableColumnNames.subList(
-                        auditTableColumnNames.size() - tableColumnNames.size() + 1, auditTableColumnNames.size());
+        int count = jdbcTemplate.update(sql, insertValues.toArray());
+        return count > 0;
+    }
 
-                List<String> dataFromColumnsBeforeChange = getDataFromResultSet(rs, columnsBeforeChange);
-                List<String> dataFromColumnsAfterChange = getDataFromResultSet(rs, columnsAfterChange);
+    @Override
+    public Optional<TableAuditDto> findRecordInAuditTableById(String tableName, int id) {
+        String auditTable = AUDIT_TABLE_PREFIX + tableName;
+        String sql = SELECT_ALL_WHERE_SQL.formatted(auditTable, id);
 
-                tableAuditDto.setColumnsBeforeChange(dataFromColumnsBeforeChange);
-                tableAuditDto.setColumnsAfterChange(dataFromColumnsAfterChange);
+        TableAuditDto tableAuditDto = jdbcTemplate.queryForObject(sql,
+                new TableAutidDtoRowMapper(tableMetadataProvider, tableName, auditTable));
 
-                return tableAuditDto;
-            }
+        return Optional.ofNullable(tableAuditDto);
+    }
 
-            private List<String> getDataFromResultSet(ResultSet rs, List<String> subColumns) {
-                return subColumns.stream()
-                        .map(col -> {
-                            try {
-                                return rs.getString(col);
-                            } catch (SQLException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }).toList();
-            }
-        };
+    private TableSchemaDto getTableSchemaDto(String tableName) {
+        return new TableSchemaDto(
+                tableName,
+                tableMetadataProvider.getAllColumnsForTable(tableName),
+                tableMetadataProvider.doesTableExist(AUDIT_TABLE_PREFIX + tableName),
+                tableMetadataProvider.doTriggersExistForTable(tableName));
     }
 
     private String getDateFiltrationSql(String auditTable, String startTime, String endTime) {
@@ -120,59 +113,21 @@ public class DashboardRepositoryImpl implements DashboardRepository {
         return sqlBuilder.toString();
     }
 
-    @Override
-    public boolean doesAuditTableExist(String tableName) {
-        String auditTable = "audit_" + tableName;
-
-        return tableMetadataProvider.doesTableExist(auditTable);
-    }
-
-    @Override
-    public boolean restoreRecord(String tableName, int id) {
-        String auditTable = "audit_" + tableName;
-
-        List<String> tableColumnNames = tableMetadataProvider.getAllColumnsForTable(tableName);
-        TableAuditDto tableAudit = findRecordInAuditTableById(tableName, id)
-                .orElseThrow(() -> new IllegalStateException("Couldn't find a record with id: " + id));
-        List<String> insertValues = tableAudit.getColumnsBeforeChange();
-
-        String insertPlaceholders = insertValues.stream()
-                .map(val -> "?")
-                .collect(Collectors.joining(", "));
-        String valueAlias = "new_" + (tableName.endsWith("s") ?
-                tableName.substring(0, tableName.length() - 1) : tableName);
-        String updateStructure = tableColumnNames.subList(1, tableColumnNames.size()).stream()
+    private String getUpdateStructure(List<String> tableColumnNames, String valueAlias) {
+        return tableColumnNames.subList(1, tableColumnNames.size()).stream()
                 .map(col -> "\t%1$s = %2$s.%1$s".formatted(col, valueAlias))
                 .collect(Collectors.joining(",\n"));
-
-        String sql = """
-                INSERT INTO %s (%s)
-                VALUES (%d, %s) AS %s
-                ON DUPLICATE KEY UPDATE
-                %s;
-                """.formatted(tableName,
-                String.join(", ", tableColumnNames),
-                tableAudit.getTableId(),
-                insertPlaceholders,
-                valueAlias,
-                updateStructure);
-
-        int count = jdbcTemplate.update(sql, insertValues.toArray());
-        return count > 0;
     }
 
-    @Override
-    public Optional<TableAuditDto> findRecordInAuditTableById(String tableName, int id) {
-        String auditTable = "audit_" + tableName;
-        String sql = """
-                SELECT * FROM %s
-                WHERE audit_id = %d;
-                """.formatted(auditTable, id);
+    private String getValueAlias(String tableName) {
+        return "new_" + (tableName.endsWith("s") ?
+                tableName.substring(0, tableName.length() - 1) : tableName);
+    }
 
-        TableAuditDto tableAuditDto = jdbcTemplate.queryForObject(sql,
-                getRowMapperForTableAuditDto(auditTable, tableName));
-
-        return Optional.ofNullable(tableAuditDto);
+    private String getInsertPlaceHolders(List<String> insertValues) {
+        return insertValues.stream()
+                .map(val -> "?")
+                .collect(Collectors.joining(", "));
     }
 
 }

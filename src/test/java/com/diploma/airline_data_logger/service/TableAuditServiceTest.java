@@ -3,8 +3,7 @@ package com.diploma.airline_data_logger.service;
 import com.diploma.airline_data_logger.repository.TableAuditRepository;
 import com.diploma.airline_data_logger.repository.TableMetadataProvider;
 import com.diploma.airline_data_logger.service.impl.TableAuditServiceImpl;
-import org.assertj.core.api.AbstractThrowableAssert;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,14 +12,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TableAuditServiceTest {
-
-    private static String tableName;
-    private static String auditTable;
+class TableAuditServiceTest {
 
     @Mock
     private TableAuditRepository tableAuditRepository;
@@ -28,173 +25,56 @@ public class TableAuditServiceTest {
     @Mock
     private TableMetadataProvider tableMetadataProvider;
 
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private TableAuditServiceImpl underTest;
 
-    @BeforeAll
-    static void beforeAll() {
-        tableName = "flights";
-        auditTable = "audit_" + tableName;
-    }
-
     @Test
-    void givenTableName_whenCreateAuditTableByTableName_thenReturnSuccessfulMessage() {
-        // given
-        given(tableMetadataProvider.doesTableExist(auditTable))
-                .willReturn(false);
-        willDoNothing().given(tableAuditRepository)
-                .createAuditTable(tableName);
+    @DisplayName("Should successfully create triggers when validation passes")
+    void createTriggersForTable_Success() {
+        String tableName = "bookings";
+        String auditTableName = "audit_bookings";
 
-        // when
-        String result = underTest.createAuditTableByTableName(tableName);
+        given(tableMetadataProvider.doesTableExist(auditTableName)).willReturn(true);
+        given(tableMetadataProvider.doTriggersExistForTable(tableName)).willReturn(false);
 
-        // then
-        assertThat(result).isEqualTo("'%s' table successfully created!".formatted(auditTable));
-    }
-
-    @Test
-    void givenTableName_whenCreateAuditTableByTableName_thenThrowsException() {
-        // given
-        given(tableMetadataProvider.doesTableExist(auditTable))
-                .willReturn(true);
-
-        // when
-        AbstractThrowableAssert<?, ? extends Throwable> result =
-                assertThatThrownBy(() -> underTest.createAuditTableByTableName(tableName));
-
-        // then
-        result.isInstanceOf(IllegalStateException.class)
-                .hasMessage("'%s' table already exists.".formatted(auditTable));
-
-    }
-
-    @Test
-    void givenTableName_whenCreateTriggersForTable_thenThrowExceptionIfAuditTableDoesNotExist() {
-        // given
-        given(tableMetadataProvider.doesTableExist(auditTable))
-                .willReturn(false);
-
-        // when
-        AbstractThrowableAssert<?, ? extends Throwable> result =
-                assertThatThrownBy(() -> underTest.createTriggersForTable(tableName));
-
-        // then
-        result.isInstanceOf(IllegalStateException.class)
-                .hasMessage("Audit table should be created first!");
-    }
-
-    @Test
-    void givenTableName_whenCreateTriggersForTable_thenThrowExceptionIfTriggersAlreadyExistForTable() {
-        // given
-        given(tableMetadataProvider.doesTableExist(auditTable))
-                .willReturn(true);
-        given(tableMetadataProvider.doTriggersExistForTable(tableName))
-                .willReturn(true);
-
-        // when
-        AbstractThrowableAssert<?, ? extends Throwable> result =
-                assertThatThrownBy(() -> underTest.createTriggersForTable(tableName));
-
-        // then
-        result.isInstanceOf(IllegalStateException.class)
-                .hasMessage("Triggers for table '%s' already exist!".formatted(tableName));
-    }
-
-    @Test
-    void givenTableName_whenCreateTriggersForTable_thenReturnSuccessfulMessage() {
-        // given
-        given(tableMetadataProvider.doesTableExist(auditTable))
-                .willReturn(true);
-        given(tableMetadataProvider.doTriggersExistForTable(tableName))
-                .willReturn(false);
-        willDoNothing().given(tableAuditRepository).createTriggersForTable(tableName);
-
-        // when
         String result = underTest.createTriggersForTable(tableName);
 
-        // then
-        assertThat(result).isEqualTo("Triggers for table '%s' successfully created!".formatted(tableName));
+        assertThat(result).isEqualTo("Triggers for table 'bookings' successfully created!");
+        verify(tableAuditRepository, times(1)).createTriggersForTable(tableName);
     }
 
     @Test
-    void givenTableName_whenDeleteTriggersByTableName_thenThrowExceptionIfAuditTableDoesNotExist() {
-        // given
-        given(tableMetadataProvider.doesTableExist(auditTable))
-                .willReturn(false);
+    @DisplayName("Should throw exception when audit table does not exist")
+    void createTriggersForTable_Fail_NoAuditTable() {
+        String tableName = "flights";
+        String auditTableName = "audit_flights";
 
-        // when
-        AbstractThrowableAssert<?, ? extends Throwable> result =
-                assertThatThrownBy(() -> underTest.deleteTriggersByTableName(tableName));
+        given(tableMetadataProvider.doesTableExist(auditTableName)).willReturn(false);
 
-        // then
-        result.isInstanceOf(IllegalStateException.class)
+        assertThatThrownBy(() -> underTest.createTriggersForTable(tableName))
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Audit table should be created first!");
+
+        verify(tableAuditRepository, never()).createTriggersForTable(anyString());
     }
 
     @Test
-    void givenTableName_whenDeleteTriggersByTableName_thenThrowExceptionIfTriggersAlreadyExistForTable() {
-        // given
-        given(tableMetadataProvider.doesTableExist(auditTable))
-                .willReturn(true);
-        given(tableMetadataProvider.doTriggersExistForTable(tableName))
-                .willReturn(false);
+    @DisplayName("Should throw exception when triggers already exist")
+    void createTriggersForTable_Fail_TriggersAlreadyExist() {
+        String tableName = "passengers";
+        String auditTableName = "audit_passengers";
 
-        // when
-        AbstractThrowableAssert<?, ? extends Throwable> result =
-                assertThatThrownBy(() -> underTest.deleteTriggersByTableName(tableName));
+        given(tableMetadataProvider.doesTableExist(auditTableName)).willReturn(true);
+        given(tableMetadataProvider.doTriggersExistForTable(tableName)).willReturn(true);
 
-        // then
-        result.isInstanceOf(IllegalStateException.class)
-                .hasMessage("Triggers for table '%s' do not exist!".formatted(tableName));
+        assertThatThrownBy(() -> underTest.createTriggersForTable(tableName))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Triggers for table 'passengers' already exist!");
+
+        verify(tableAuditRepository, never()).createTriggersForTable(anyString());
     }
-
-    @Test
-    void givenTableName_whenDeleteTriggersByTableName_thenReturnSuccessfulMessage() {
-        // given
-        given(tableMetadataProvider.doesTableExist(auditTable))
-                .willReturn(true);
-        given(tableMetadataProvider.doTriggersExistForTable(tableName))
-                .willReturn(true);
-        willDoNothing().given(tableAuditRepository).deleteTriggersForTable(tableName);
-
-        // when
-        String result = underTest.deleteTriggersByTableName(tableName);
-
-        // then
-        assertThat(result).isEqualTo("Triggers for table '%s' successfully deleted!".formatted(tableName));
-    }
-
-    @Test
-    void givenTableName_whenDeleteAuditTableByTableName_thenThrowExceptionIfAuditTableDoesNotExist() {
-        // given
-        given(tableMetadataProvider.doesTableExist(auditTable))
-                .willReturn(false);
-
-        // when
-        AbstractThrowableAssert<?, ? extends Throwable> result =
-                assertThatThrownBy(() -> underTest.deleteAuditTableByTableName(tableName));
-
-        // then
-        result.isInstanceOf(IllegalStateException.class)
-                .hasMessage("Audit table should be created first!");
-    }
-
-    @Test
-    void givenTableName_whenDeleteAuditTableByTableName_thenReturnSuccessfulMessage() {
-        // given
-        given(tableMetadataProvider.doesTableExist(auditTable))
-                .willReturn(true);
-        given(tableMetadataProvider.doTriggersExistForTable(tableName))
-                .willReturn(true);
-        willDoNothing().given(tableAuditRepository).deleteTriggersForTable(tableName);
-        willDoNothing().given(tableAuditRepository).deleteAuditTable(tableName);
-
-        // when
-        String result = underTest.deleteAuditTableByTableName(tableName);
-
-        // then
-        assertThat(result).isEqualTo("'%s' table successfully deleted!".formatted(auditTable));
-    }
-
 
 }

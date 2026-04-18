@@ -4,18 +4,16 @@ import com.diploma.airline_data_logger.dto.TableAuditDto;
 import com.diploma.airline_data_logger.dto.TableSchemaDto;
 import com.diploma.airline_data_logger.repository.DashboardRepository;
 import com.diploma.airline_data_logger.service.DashboardService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
     private final DashboardRepository dashboardRepository;
-
-    public DashboardServiceImpl(DashboardRepository dashboardRepository) {
-        this.dashboardRepository = dashboardRepository;
-    }
 
     @Override
     public List<TableSchemaDto> getTableSchemas() {
